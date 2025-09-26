@@ -19,6 +19,7 @@ export interface Subscription {
     status: SubscriptionStatus;
     startDate: Date;
     endDate: Date;
+    subscriptionEndDate: Date; // Дата закінчення підписки (може відрізнятися від endDate)
     price: number; // Ціна на момент створення підписки
     createdAt: Date;
     updatedAt: Date;
@@ -43,6 +44,7 @@ export interface CreateSubscriptionData {
 export interface UpdateSubscriptionData {
     status?: SubscriptionStatus;
     endDate?: Date;
+    subscriptionEndDate?: Date;
     paymentMethod?: string;
     autoRenew?: boolean;
 }
@@ -86,6 +88,7 @@ export class SubscriptionService {
             status: SubscriptionStatus.PENDING,
             startDate: now,
             endDate: endDate,
+            subscriptionEndDate: endDate, // Спочатку subscriptionEndDate = endDate
             price: plan.price,
             createdAt: now,
             updatedAt: now,
@@ -189,8 +192,9 @@ export class SubscriptionService {
 
         const now = new Date();
         return subscription.status === SubscriptionStatus.ACTIVE &&
-            subscription.endDate > now;
+            subscription.subscriptionEndDate > now;
     }
+
 
     /**
      * Отримати всі підписки
