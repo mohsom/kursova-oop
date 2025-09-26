@@ -1,0 +1,402 @@
+{
+  "info": {
+    "name": "SaaS Subscription Management API",
+    "description": "Колекція для тестування API системи управління підписками SaaS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER_ID_HERE\",\n  \"type\": \"premium\",\n  \"price\": 29.99,\n  \"durationMonths\": 1,\n  \"paymentMethod\": \"credit_card\",\n  \"autoRenew\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get All Subscriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Get Subscription by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/:subscriptionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["subscriptions", ":subscriptionId"],
+              "variable": [
+                {
+                  "key": "subscriptionId",
+                  "value": "SUBSCRIPTION_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Subscriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/:userId/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":userId", "subscriptions"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Subscription",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"enterprise\",\n  \"price\": 99.99,\n  \"autoRenew\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/:subscriptionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["subscriptions", ":subscriptionId"],
+              "variable": [
+                {
+                  "key": "subscriptionId",
+                  "value": "SUBSCRIPTION_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/subscriptions/:subscriptionId/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["subscriptions", ":subscriptionId", "cancel"],
+              "variable": [
+                {
+                  "key": "subscriptionId",
+                  "value": "SUBSCRIPTION_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Payment Processed Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment_processed\",\n  \"subscriptionId\": \"SUBSCRIPTION_ID_HERE\",\n  \"userId\": \"USER_ID_HERE\",\n  \"timestamp\": \"2024-01-01T00:00:00.000Z\",\n  \"metadata\": {\n    \"paymentId\": \"pay_123456\",\n    \"amount\": 29.99\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks"]
+            }
+          }
+        },
+        {
+          "name": "Payment Failed Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment_failed\",\n  \"subscriptionId\": \"SUBSCRIPTION_ID_HERE\",\n  \"userId\": \"USER_ID_HERE\",\n  \"timestamp\": \"2024-01-01T00:00:00.000Z\",\n  \"metadata\": {\n    \"reason\": \"insufficient_funds\",\n    \"attemptCount\": 3\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks"]
+            }
+          }
+        },
+        {
+          "name": "Subscription Cancelled Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"subscription_cancelled\",\n  \"subscriptionId\": \"SUBSCRIPTION_ID_HERE\",\n  \"userId\": \"USER_ID_HERE\",\n  \"timestamp\": \"2024-01-01T00:00:00.000Z\",\n  \"metadata\": {\n    \"reason\": \"user_request\",\n    \"cancelledAt\": \"2024-01-01T00:00:00.000Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks"]
+            }
+          }
+        },
+        {
+          "name": "Test Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"payment_processed\",\n  \"subscriptionId\": \"SUBSCRIPTION_ID_HERE\",\n  \"userId\": \"USER_ID_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["webhooks", "test"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Demo Scenarios",
+      "item": [
+        {
+          "name": "Complete User Journey",
+          "item": [
+            {
+              "name": "1. Create User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"demo@example.com\",\n  \"name\": \"Demo User\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users"]
+                }
+              }
+            },
+            {
+              "name": "2. Create Subscription",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"premium\",\n  \"price\": 29.99,\n  \"durationMonths\": 1,\n  \"paymentMethod\": \"credit_card\",\n  \"autoRenew\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["subscriptions"]
+                }
+              }
+            },
+            {
+              "name": "3. Process Payment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event\": \"payment_processed\",\n  \"subscriptionId\": \"{{subscriptionId}}\",\n  \"userId\": \"{{userId}}\",\n  \"timestamp\": \"2024-01-01T00:00:00.000Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/webhooks",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["webhooks"]
+                }
+              }
+            },
+            {
+              "name": "4. Check Active Subscription",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}/subscriptions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "{{userId}}", "subscriptions"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

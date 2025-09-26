@@ -1,0 +1,15 @@
+[
+  {
+    "userId": "mg0q6psjb236pe110xm",
+    "type": "premium",
+    "status": "pending",
+    "startDate": "2025-09-26T10:55:56.874Z",
+    "endDate": "2025-10-26T11:55:56.874Z",
+    "price": 29.99,
+    "createdAt": "2025-09-26T10:55:56.874Z",
+    "updatedAt": "2025-09-26T10:55:56.874Z",
+    "paymentMethod": "credit_card",
+    "autoRenew": true,
+    "id": "mg0q7paiqw467h3h21"
+  }
+]
