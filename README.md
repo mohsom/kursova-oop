@@ -11,28 +11,40 @@
 1. **DatabaseInterface<T>** - абстрактний клас для доступу до бази даних
 2. **JsonDatabase<T>** - реалізація доступу до бази даних через JSON файли
 3. **UserService** - клас для роботи з користувачами
-4. **SubscriptionService** - клас для роботи з підписками
-5. **WebhookHandler** - клас для обробки webhook подій
+4. **SubscriptionPlanService** - клас для роботи з планами підписок
+5. **SubscriptionService** - клас для роботи з підписками користувачів
+6. **WebhookHandler** - клас для обробки webhook подій
 
 ### Моделі даних:
 
 - **User** - користувач системи
-- **Subscription** - підписка користувача
+- **SubscriptionPlan** - план підписки (продукт)
+- **Subscription** - підписка користувача на план
 - **WebhookPayload** - дані webhook подій
+
+### Архітектура за принципом Paddle:
+
+- **Плани підписок** - окремі продукти/тарифи (Basic, Premium, Enterprise)
+- **Підписки користувачів** - зв'язок між користувачем та планом
+- **Багато до одного** - багато користувачів можуть мати підписку на один план
+- **Гнучкість** - можна створювати нові типи планів без зміни коду
 
 ## Встановлення та запуск
 
 1. Встановіть залежності:
+
 ```bash
 npm install
 ```
 
 2. Запустіть сервер:
+
 ```bash
 npm start
 ```
 
 Або для розробки з автоперезавантаженням:
+
 ```bash
 npm run dev
 ```
@@ -42,13 +54,23 @@ npm run dev
 ## API Endpoints
 
 ### Користувачі
+
 - `GET /api/users` - Отримати всіх користувачів
 - `GET /api/users/:id` - Отримати користувача за ID
 - `POST /api/users` - Створити користувача
 - `PUT /api/users/:id` - Оновити користувача
 - `DELETE /api/users/:id` - Видалити користувача
 
+### Плани підписок
+
+- `GET /api/plans` - Отримати всі плани підписок
+- `GET /api/plans/:id` - Отримати план за ID
+- `POST /api/plans` - Створити план підписки
+- `PUT /api/plans/:id` - Оновити план підписки
+- `DELETE /api/plans/:id` - Видалити план
+
 ### Підписки
+
 - `GET /api/subscriptions` - Отримати всі підписки
 - `GET /api/subscriptions/:id` - Отримати підписку за ID
 - `POST /api/subscriptions` - Створити підписку
@@ -57,6 +79,7 @@ npm run dev
 - `GET /api/users/:userId/subscriptions` - Підписки користувача
 
 ### Webhooks
+
 - `POST /api/webhooks` - Обробити webhook
 - `POST /api/webhooks/test` - Тестовий webhook
 
@@ -70,27 +93,42 @@ npm run dev
 ## Приклад використання
 
 ### Створення користувача
+
 ```bash
 curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "name": "John Doe"}'
 ```
 
+### Створення плану підписки
+
+```bash
+curl -X POST http://localhost:3000/api/plans \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Premium Plan",
+    "description": "Premium subscription with advanced features",
+    "price": 29.99,
+    "billingInterval": "monthly",
+    "features": ["Advanced analytics", "Priority support", "API access"]
+  }'
+```
+
 ### Створення підписки
+
 ```bash
 curl -X POST http://localhost:3000/api/subscriptions \
   -H "Content-Type: application/json" \
   -d '{
     "userId": "USER_ID",
-    "type": "premium",
-    "price": 29.99,
-    "durationMonths": 1,
+    "planId": "PLAN_ID",
     "paymentMethod": "credit_card",
     "autoRenew": true
   }'
 ```
 
 ### Обробка webhook
+
 ```bash
 curl -X POST http://localhost:3000/api/webhooks \
   -H "Content-Type: application/json" \

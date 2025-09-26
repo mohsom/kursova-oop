@@ -10,29 +10,21 @@ export enum SubscriptionStatus {
 }
 
 /**
- * Типи підписки
- */
-export enum SubscriptionType {
-    BASIC = 'basic',
-    PREMIUM = 'premium',
-    ENTERPRISE = 'enterprise'
-}
-
-/**
  * Інтерфейс підписки
  */
 export interface Subscription {
     id: string;
     userId: string;
-    type: SubscriptionType;
+    planId: string; // Зв'язок з планом підписки
     status: SubscriptionStatus;
     startDate: Date;
     endDate: Date;
-    price: number;
+    price: number; // Ціна на момент створення підписки
     createdAt: Date;
     updatedAt: Date;
     paymentMethod?: string;
     autoRenew: boolean;
+    billingInterval: 'monthly' | 'yearly';
 }
 
 /**
@@ -40,9 +32,7 @@ export interface Subscription {
  */
 export interface CreateSubscriptionData {
     userId: string;
-    type: SubscriptionType;
-    price: number;
-    durationMonths: number;
+    planId: string; // ID плану підписки
     paymentMethod?: string;
     autoRenew?: boolean;
 }
@@ -51,10 +41,8 @@ export interface CreateSubscriptionData {
  * Дані для оновлення підписки
  */
 export interface UpdateSubscriptionData {
-    type?: SubscriptionType;
     status?: SubscriptionStatus;
     endDate?: Date;
-    price?: number;
     paymentMethod?: string;
     autoRenew?: boolean;
 }
@@ -63,27 +51,47 @@ export interface UpdateSubscriptionData {
  * Клас для роботи з підписками
  */
 export class SubscriptionService {
-    constructor(private subscriptionRepository: any) { }
+    constructor(
+        private subscriptionRepository: any,
+        private planRepository: any
+    ) { }
 
     /**
      * Створити нову підписку
      */
     async createSubscription(subscriptionData: CreateSubscriptionData): Promise<Subscription> {
+        // Отримуємо план підписки
+        const plan = await this.planRepository.findById(subscriptionData.planId);
+        if (!plan) {
+            throw new Error('План підписки не знайдений');
+        }
+
+        if (!plan.isActive) {
+            throw new Error('План підписки неактивний');
+        }
+
         const now = new Date();
         const endDate = new Date();
-        endDate.setMonth(endDate.getMonth() + subscriptionData.durationMonths);
+
+        // Встановлюємо дату закінчення залежно від інтервалу оплати
+        if (plan.billingInterval === 'monthly') {
+            endDate.setMonth(endDate.getMonth() + 1);
+        } else {
+            endDate.setFullYear(endDate.getFullYear() + 1);
+        }
 
         const subscription: Omit<Subscription, 'id'> = {
             userId: subscriptionData.userId,
-            type: subscriptionData.type,
+            planId: subscriptionData.planId,
             status: SubscriptionStatus.PENDING,
             startDate: now,
             endDate: endDate,
-            price: subscriptionData.price,
+            price: plan.price,
             createdAt: now,
             updatedAt: now,
             paymentMethod: subscriptionData.paymentMethod,
-            autoRenew: subscriptionData.autoRenew ?? true
+            autoRenew: subscriptionData.autoRenew ?? true,
+            billingInterval: plan.billingInterval
         };
 
         return await this.subscriptionRepository.create(subscription);
@@ -196,5 +204,50 @@ export class SubscriptionService {
      */
     async deleteSubscription(id: string): Promise<boolean> {
         return await this.subscriptionRepository.delete(id);
+    }
+
+    /**
+     * Отримати підписки за планом
+     */
+    async getSubscriptionsByPlan(planId: string): Promise<Subscription[]> {
+        return await this.subscriptionRepository.findBy({ planId });
+    }
+
+    /**
+     * Отримати активні підписки за планом
+     */
+    async getActiveSubscriptionsByPlan(planId: string): Promise<Subscription[]> {
+        return await this.subscriptionRepository.findBy({
+            planId,
+            status: SubscriptionStatus.ACTIVE
+        });
+    }
+
+    /**
+     * Отримати підписку з інформацією про план
+     */
+    async getSubscriptionWithPlan(id: string): Promise<(Subscription & { plan: any }) | null> {
+        const subscription = await this.getSubscriptionById(id);
+        if (!subscription) {
+            return null;
+        }
+
+        const plan = await this.planRepository.findById(subscription.planId);
+        return { ...subscription, plan };
+    }
+
+    /**
+     * Отримати всі підписки користувача з інформацією про плани
+     */
+    async getUserSubscriptionsWithPlans(userId: string): Promise<(Subscription & { plan: any })[]> {
+        const subscriptions = await this.getUserSubscriptions(userId);
+        const subscriptionsWithPlans = [];
+
+        for (const subscription of subscriptions) {
+            const plan = await this.planRepository.findById(subscription.planId);
+            subscriptionsWithPlans.push({ ...subscription, plan });
+        }
+
+        return subscriptionsWithPlans;
     }
 }

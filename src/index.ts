@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import { JsonDatabase } from './database/JsonDatabase';
 import { UserService } from './models/User';
 import { SubscriptionService } from './models/Subscription';
+import { SubscriptionPlanService } from './models/SubscriptionPlan';
 import { WebhookHandler } from './webhooks/WebhookHandler';
 import { createRoutes } from './api/routes';
 
@@ -27,21 +28,24 @@ class Server {
    */
   private initializeDatabase(): void {
     console.log('Ініціалізація бази даних...');
-    
+
     // Створення репозиторіїв
     const userRepository = new JsonDatabase('users');
     const subscriptionRepository = new JsonDatabase('subscriptions');
-    
+    const planRepository = new JsonDatabase('subscription_plans');
+
     // Створення сервісів
     const userService = new UserService(userRepository);
-    const subscriptionService = new SubscriptionService(subscriptionRepository);
+    const planService = new SubscriptionPlanService(planRepository);
+    const subscriptionService = new SubscriptionService(subscriptionRepository, planRepository);
     const webhookHandler = new WebhookHandler(subscriptionService);
-    
+
     // Збереження сервісів в app locals для використання в роутах
     this.app.locals.userService = userService;
+    this.app.locals.planService = planService;
     this.app.locals.subscriptionService = subscriptionService;
     this.app.locals.webhookHandler = webhookHandler;
-    
+
     console.log('База даних ініціалізована');
   }
 
@@ -51,11 +55,11 @@ class Server {
   private initializeMiddleware(): void {
     // CORS
     this.app.use(cors());
-    
+
     // Body parser
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
-    
+
     // Логування запитів
     this.app.use((req, res, next) => {
       console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -67,11 +71,11 @@ class Server {
    * Ініціалізація роутів
    */
   private initializeRoutes(): void {
-    const { userService, subscriptionService, webhookHandler } = this.app.locals;
-    
+    const { userService, planService, subscriptionService, webhookHandler } = this.app.locals;
+
     // API роути
-    this.app.use('/api', createRoutes(userService, subscriptionService, webhookHandler));
-    
+    this.app.use('/api', createRoutes(userService, subscriptionService, planService, webhookHandler));
+
     // Головна сторінка
     this.app.get('/', (req, res) => {
       res.json({
@@ -84,7 +88,7 @@ class Server {
         }
       });
     });
-    
+
     // Обробка неіснуючих роутів
     this.app.use('*', (req, res) => {
       res.status(404).json({
@@ -108,6 +112,11 @@ class Server {
       console.log('  POST   /api/users                     - Створити користувача');
       console.log('  PUT    /api/users/:id                 - Оновити користувача');
       console.log('  DELETE /api/users/:id                 - Видалити користувача');
+      console.log('  GET    /api/plans                     - Отримати всі плани підписок');
+      console.log('  GET    /api/plans/:id                 - Отримати план за ID');
+      console.log('  POST   /api/plans                     - Створити план підписки');
+      console.log('  PUT    /api/plans/:id                 - Оновити план підписки');
+      console.log('  DELETE /api/plans/:id                 - Видалити план');
       console.log('  GET    /api/subscriptions             - Отримати всі підписки');
       console.log('  GET    /api/subscriptions/:id         - Отримати підписку за ID');
       console.log('  POST   /api/subscriptions             - Створити підписку');

@@ -31,8 +31,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
             }
           }
         },
@@ -42,8 +46,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
             }
           }
         },
@@ -53,8 +61,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/users/:userId",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", ":userId"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":userId"
+              ],
               "variable": [
                 {
                   "key": "userId",
@@ -80,8 +93,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/users/:userId",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", ":userId"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":userId"
+              ],
               "variable": [
                 {
                   "key": "userId",
@@ -97,12 +115,138 @@
             "method": "DELETE",
             "url": {
               "raw": "{{baseUrl}}/users/:userId",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", ":userId"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":userId"
+              ],
               "variable": [
                 {
                   "key": "userId",
                   "value": "USER_ID_HERE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscription Plans",
+      "item": [
+        {
+          "name": "Create Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium Plan\",\n  \"description\": \"Premium subscription with advanced features\",\n  \"price\": 29.99,\n  \"billingInterval\": \"monthly\",\n  \"features\": [\"Advanced analytics\", \"Priority support\", \"API access\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Plans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Plan by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plans/:planId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                ":planId"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "PLAN_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium Plan Updated\",\n  \"price\": 39.99,\n  \"features\": [\"Advanced analytics\", \"Priority support\", \"API access\", \"Custom integrations\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plans/:planId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                ":planId"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "PLAN_ID_HERE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Plan",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/plans/:planId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                ":planId"
+              ],
+              "variable": [
+                {
+                  "key": "planId",
+                  "value": "PLAN_ID_HERE"
                 }
               ]
             }
@@ -125,12 +269,16 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"USER_ID_HERE\",\n  \"type\": \"premium\",\n  \"price\": 29.99,\n  \"durationMonths\": 1,\n  \"paymentMethod\": \"credit_card\",\n  \"autoRenew\": true\n}"
+              "raw": "{\n  \"userId\": \"USER_ID_HERE\",\n  \"planId\": \"PLAN_ID_HERE\",\n  \"paymentMethod\": \"credit_card\",\n  \"autoRenew\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/subscriptions",
-              "host": ["{{baseUrl}}"],
-              "path": ["subscriptions"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions"
+              ]
             }
           }
         },
@@ -140,8 +288,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/subscriptions",
-              "host": ["{{baseUrl}}"],
-              "path": ["subscriptions"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions"
+              ]
             }
           }
         },
@@ -151,8 +303,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/subscriptions/:subscriptionId",
-              "host": ["{{baseUrl}}"],
-              "path": ["subscriptions", ":subscriptionId"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                ":subscriptionId"
+              ],
               "variable": [
                 {
                   "key": "subscriptionId",
@@ -168,8 +325,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/users/:userId/subscriptions",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", ":userId", "subscriptions"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":userId",
+                "subscriptions"
+              ],
               "variable": [
                 {
                   "key": "userId",
@@ -195,8 +358,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/subscriptions/:subscriptionId",
-              "host": ["{{baseUrl}}"],
-              "path": ["subscriptions", ":subscriptionId"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                ":subscriptionId"
+              ],
               "variable": [
                 {
                   "key": "subscriptionId",
@@ -212,8 +380,14 @@
             "method": "POST",
             "url": {
               "raw": "{{baseUrl}}/subscriptions/:subscriptionId/cancel",
-              "host": ["{{baseUrl}}"],
-              "path": ["subscriptions", ":subscriptionId", "cancel"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subscriptions",
+                ":subscriptionId",
+                "cancel"
+              ],
               "variable": [
                 {
                   "key": "subscriptionId",
@@ -244,8 +418,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/webhooks",
-              "host": ["{{baseUrl}}"],
-              "path": ["webhooks"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
             }
           }
         },
@@ -265,8 +443,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/webhooks",
-              "host": ["{{baseUrl}}"],
-              "path": ["webhooks"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
             }
           }
         },
@@ -286,8 +468,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/webhooks",
-              "host": ["{{baseUrl}}"],
-              "path": ["webhooks"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
             }
           }
         },
@@ -307,8 +493,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/webhooks/test",
-              "host": ["{{baseUrl}}"],
-              "path": ["webhooks", "test"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "test"
+              ]
             }
           }
         }
@@ -336,13 +527,17 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/users",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["users"]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users"
+                  ]
                 }
               }
             },
             {
-              "name": "2. Create Subscription",
+              "name": "2. Create Subscription Plan",
               "request": {
                 "method": "POST",
                 "header": [
@@ -353,17 +548,46 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"premium\",\n  \"price\": 29.99,\n  \"durationMonths\": 1,\n  \"paymentMethod\": \"credit_card\",\n  \"autoRenew\": true\n}"
+                  "raw": "{\n  \"name\": \"Premium Plan\",\n  \"description\": \"Premium subscription with advanced features\",\n  \"price\": 29.99,\n  \"billingInterval\": \"monthly\",\n  \"features\": [\"Advanced analytics\", \"Priority support\", \"API access\"]\n}"
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/subscriptions",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["subscriptions"]
+                  "raw": "{{baseUrl}}/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "plans"
+                  ]
                 }
               }
             },
             {
-              "name": "3. Process Payment",
+              "name": "3. Create Subscription",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"planId\": \"{{planId}}\",\n  \"paymentMethod\": \"credit_card\",\n  \"autoRenew\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "4. Process Payment",
               "request": {
                 "method": "POST",
                 "header": [
@@ -378,19 +602,29 @@
                 },
                 "url": {
                   "raw": "{{baseUrl}}/webhooks",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["webhooks"]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "webhooks"
+                  ]
                 }
               }
             },
             {
-              "name": "4. Check Active Subscription",
+              "name": "5. Check Active Subscription",
               "request": {
                 "method": "GET",
                 "url": {
                   "raw": "{{baseUrl}}/users/{{userId}}/subscriptions",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["users", "{{userId}}", "subscriptions"]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{userId}}",
+                    "subscriptions"
+                  ]
                 }
               }
             }
