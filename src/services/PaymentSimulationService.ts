@@ -84,6 +84,34 @@ export class PaymentSimulationService {
     }
 
     /**
+     * Отримати всі підписки користувача як Subscription об'єкти
+     */
+    async getUserSubscriptionsAsSubscriptions(userEmail: string): Promise<any[]> {
+        const subscriptionsData = await this.subscriptionRepository.findBy({ email: userEmail });
+        return subscriptionsData.map(subData => {
+            // Перевіряємо, чи subscriptionEndDate є Date об'єктом
+            const endDate = subData.subscriptionEndDate instanceof Date
+                ? subData.subscriptionEndDate
+                : new Date(subData.subscriptionEndDate);
+
+            return {
+                id: subData.id,
+                userId: subData.email,
+                planId: subData.subscriptionPlanId,
+                status: 'active' as const,
+                startDate: new Date().toISOString(),
+                endDate: endDate.toISOString(),
+                subscriptionEndDate: endDate.toISOString(),
+                price: 0,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                autoRenew: false,
+                billingInterval: 'monthly' as const
+            };
+        });
+    }
+
+    /**
      * Отримати всі транзакції користувача
      */
     async getUserTransactions(userEmail: string): Promise<Transaction[]> {
@@ -94,6 +122,34 @@ export class PaymentSimulationService {
             transData.email,
             transData.subscriptionPlanId
         ));
+    }
+
+    /**
+     * Отримати всі підписки як Subscription об'єкти
+     */
+    async getAllSubscriptionsAsSubscriptions(): Promise<any[]> {
+        const subscriptionsData = await this.subscriptionRepository.findAll();
+        return subscriptionsData.map(subData => {
+            // Перевіряємо, чи subscriptionEndDate є Date об'єктом
+            const endDate = subData.subscriptionEndDate instanceof Date
+                ? subData.subscriptionEndDate
+                : new Date(subData.subscriptionEndDate);
+
+            return {
+                id: subData.id,
+                userId: subData.email,
+                planId: subData.subscriptionPlanId,
+                status: 'active' as const,
+                startDate: new Date().toISOString(),
+                endDate: endDate.toISOString(),
+                subscriptionEndDate: endDate.toISOString(),
+                price: 0,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                autoRenew: false,
+                billingInterval: 'monthly' as const
+            };
+        });
     }
 
     /**

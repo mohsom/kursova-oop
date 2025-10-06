@@ -20,7 +20,7 @@ export function createRoutes(
    */
   router.get('/users', async (_req: Request, res: Response) => {
     try {
-      const users = await userService.getAllUsers();
+      const users = await userService.getAllUsersWithSubscriptions();
       res.json({ success: true, data: users });
     } catch (error) {
       res.status(500).json({
@@ -302,17 +302,33 @@ export function createRoutes(
   });
 
   /**
+   * GET /api/subscriptions - Отримати всі підписки
+   */
+  router.get('/subscriptions', async (_req: Request, res: Response) => {
+    try {
+      const subscriptions = await paymentSimulationService.getAllSubscriptionsAsSubscriptions();
+      res.json({ success: true, data: subscriptions });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка отримання підписок',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
    * GET /api/payment/user/:email/subscriptions - Отримати підписки користувача
    */
   router.get('/payment/user/:email/subscriptions', async (req: Request, res: Response) => {
     try {
       const { email } = req.params;
-      const subscriptions = await paymentSimulationService.getUserSubscriptions(email);
+      const subscriptions = await paymentSimulationService.getUserSubscriptionsAsSubscriptions(email);
       res.json({ success: true, data: subscriptions });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Помилка отримання підписок користувача',
+        message: 'Помилка отримання підписки користувача',
         error: error instanceof Error ? error.message : 'Невідома помилка'
       });
     }

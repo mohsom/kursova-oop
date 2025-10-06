@@ -58,6 +58,20 @@ export const planApi = {
         const response = await api.get<ApiResponse<SubscriptionPlan>>(`/plans/${id}`);
         return response.data.data!;
     },
+
+    createPlan: async (planData: Omit<SubscriptionPlan, 'id'>): Promise<SubscriptionPlan> => {
+        const response = await api.post<ApiResponse<SubscriptionPlan>>('/plans', planData);
+        return response.data.data!;
+    },
+
+    updatePlan: async (id: string, planData: Partial<Omit<SubscriptionPlan, 'id'>>): Promise<SubscriptionPlan> => {
+        const response = await api.put<ApiResponse<SubscriptionPlan>>(`/plans/${id}`, planData);
+        return response.data.data!;
+    },
+
+    deletePlan: async (id: string): Promise<void> => {
+        await api.delete(`/plans/${id}`);
+    },
 };
 
 // Subscription API
@@ -74,6 +88,11 @@ export const subscriptionApi = {
 
     getUserSubscriptions: async (userId: string): Promise<Subscription[]> => {
         const response = await api.get<ApiResponse<Subscription[]>>(`/users/${userId}/subscriptions`);
+        return response.data.data || [];
+    },
+
+    getUserSubscriptionsByEmail: async (email: string): Promise<Subscription[]> => {
+        const response = await api.get<ApiResponse<Subscription[]>>(`/payment/user/${email}/subscriptions`);
         return response.data.data || [];
     },
 

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, User as UserIcon } from "lucide-react";
-import { userApi } from "../services/api";
-import { User, CreateUserData } from "../types";
+import { userApi, planApi } from "../services/api";
+import { User, CreateUserData, SubscriptionPlan } from "../types";
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -18,10 +19,14 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const usersData = await userApi.getAllUsers();
+      const [usersData, plansData] = await Promise.all([
+        userApi.getAllUsers(),
+        planApi.getAllPlans(),
+      ]);
       setUsers(usersData);
+      setPlans(plansData);
     } catch (err) {
-      setError("Помилка завантаження користувачів");
+      setError("Помилка завантаження даних");
       console.error(err);
     } finally {
       setLoading(false);
@@ -31,6 +36,42 @@ const UserManagement: React.FC = () => {
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
+
+  // Функція для отримання плану за ID
+  const getPlanById = (planId: string) => {
+    return plans.find((plan) => plan.id === planId);
+  };
+
+  // Функція для отримання назви плану
+  const getPlanName = (user: User) => {
+    if (!user.subscription) return "Немає підписки";
+
+    const plan = getPlanById(user.subscription.planId);
+    return plan ? plan.name : "Невідомий план";
+  };
+
+  // Функція для отримання статусу підписки
+  const getSubscriptionStatus = (user: User) => {
+    if (!user.subscription) {
+      return { status: "Неактивний", className: "status-cancelled" };
+    }
+
+    const now = new Date();
+    const endDate = new Date(user.subscription.endDate);
+
+    if (endDate > now) {
+      return { status: "Активний", className: "status-active" };
+    } else {
+      return { status: "Закінчився", className: "status-expired" };
+    }
+  };
+
+  // Функція для отримання дати закінчення
+  const getEndDate = (user: User) => {
+    if (!user.subscription) return "-";
+
+    return new Date(user.subscription.endDate).toLocaleDateString("uk-UA");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,37 +219,42 @@ const UserManagement: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.email}</td>
-                  <td>{user.name}</td>
-                  <td>Немає підписки</td>
-                  <td>
-                    <span className="status-badge status-cancelled">
-                      Неактивний
-                    </span>
-                  </td>
-                  <td>-</td>
-                  <td>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => handleEdit(user)}
+              {users.map((user) => {
+                const subscriptionStatus = getSubscriptionStatus(user);
+                return (
+                  <tr key={user.id}>
+                    <td>{user.email}</td>
+                    <td>{user.name}</td>
+                    <td>{getPlanName(user)}</td>
+                    <td>
+                      <span
+                        className={`status-badge ${subscriptionStatus.className}`}
                       >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(user.id)}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {subscriptionStatus.status}
+                      </span>
+                    </td>
+                    <td>{getEndDate(user)}</td>
+                    <td>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => handleEdit(user)}
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

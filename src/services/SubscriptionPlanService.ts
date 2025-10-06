@@ -12,15 +12,15 @@ export class SubscriptionPlanService {
      * Створити план підписки
      */
     async createPlan(name: string, price: number, period: 'monthly' | 'yearly'): Promise<SubscriptionPlan> {
-        const id = this.generateId();
-        const plan = new SubscriptionPlan(id, name, price, period);
-
         // Зберігаємо план в базі даних
-        await this.planRepository.create({
-            name: plan.name,
-            price: plan.price,
-            period: plan.period
+        const planData = await this.planRepository.create({
+            name,
+            price,
+            period
         });
+
+        // Створюємо об'єкт плану з даними з БД
+        const plan = new SubscriptionPlan(planData.id, planData.name, planData.price, planData.period);
 
         return plan;
     }

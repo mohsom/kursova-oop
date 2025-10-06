@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "email": "vova@test.com",
+    "subscriptionPlanId": "mgf4m93wma7lzt3qsup",
+    "subscriptionEndDate": "2026-10-06T12:48:08.853Z",
+    "id": "mgf4midxub6dq6llbp"
+  },
+  {
+    "email": "vova@test.com",
+    "subscriptionPlanId": "mgf4m93wma7lzt3qsup",
+    "subscriptionEndDate": "2026-10-06T12:54:53.090Z",
+    "id": "mgf4v6aqxcfl9sdvqli"
+  }
+]

@@ -45,24 +45,15 @@ const PlanManagement: React.FC = () => {
       setError(null);
 
       if (editingPlan) {
-        // Оновлення плану (потрібно додати API метод)
-        // await planApi.updatePlan(editingPlan.id, formData);
-        setPlans(
-          plans.map((plan) =>
-            plan.id === editingPlan.id
-              ? { ...plan, ...formData, updatedAt: new Date().toISOString() }
-              : plan
-          )
-        );
+        // Оновлення плану
+        await planApi.updatePlan(editingPlan.id, formData);
       } else {
-        // Створення нового плану (потрібно додати API метод)
-        // const newPlan = await planApi.createPlan(formData);
-        const newPlan: SubscriptionPlan = {
-          id: Date.now().toString(),
-          ...formData,
-        };
-        setPlans([...plans, newPlan]);
+        // Створення нового плану
+        await planApi.createPlan(formData);
       }
+
+      // Перезавантажити список планів
+      await loadPlans();
 
       setFormData({
         name: "",
@@ -90,8 +81,9 @@ const PlanManagement: React.FC = () => {
   const handleDelete = async (planId: string) => {
     if (window.confirm("Ви впевнені, що хочете видалити цей план?")) {
       try {
-        // await planApi.deletePlan(planId);
-        setPlans(plans.filter((plan) => plan.id !== planId));
+        await planApi.deletePlan(planId);
+        // Перезавантажити список планів
+        await loadPlans();
       } catch (err) {
         setError("Помилка видалення плану");
         console.error(err);

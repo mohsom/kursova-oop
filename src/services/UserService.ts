@@ -1,12 +1,16 @@
 import { DatabaseService } from '../database/DatabaseInterface';
 import { User } from '../models/User';
-import { UserData } from '../types/DatabaseTypes';
+import { UserData, UserSubscriptionData, SubscriptionPlanData } from '../types/DatabaseTypes';
+import { PaymentSimulationService } from './PaymentSimulationService';
 
 /**
  * Сервіс для роботи з користувачами
  */
 export class UserService {
-    constructor(private userRepository: DatabaseService<UserData>) { }
+    constructor(
+        private userRepository: DatabaseService<UserData>,
+        private paymentSimulationService?: PaymentSimulationService
+    ) { }
 
     /**
      * Створити користувача
@@ -51,6 +55,50 @@ export class UserService {
     async getAllUsers(): Promise<User[]> {
         const usersData = await this.userRepository.findAll();
         return usersData.map(userData => new User(userData.id, userData.name, userData.email));
+    }
+
+    /**
+     * Отримати всіх користувачів з інформацією про підписки
+     */
+    async getAllUsersWithSubscriptions(): Promise<any[]> {
+        const usersData = await this.userRepository.findAll();
+
+        if (!this.paymentSimulationService) {
+            return usersData.map(userData => ({
+                id: userData.id,
+                name: userData.name,
+                email: userData.email,
+                subscription: null
+            }));
+        }
+
+        const result = [];
+        for (const userData of usersData) {
+            try {
+                const subscriptions = await this.paymentSimulationService.getUserSubscriptionsAsSubscriptions(userData.email);
+                const activeSubscription = subscriptions.find(sub => {
+                    const endDate = new Date(sub.endDate);
+                    return endDate > new Date();
+                });
+
+                result.push({
+                    id: userData.id,
+                    name: userData.name,
+                    email: userData.email,
+                    subscription: activeSubscription || null
+                });
+            } catch (error) {
+                console.error(`Помилка отримання підписок для користувача ${userData.email}:`, error);
+                result.push({
+                    id: userData.id,
+                    name: userData.name,
+                    email: userData.email,
+                    subscription: null
+                });
+            }
+        }
+
+        return result;
     }
 
     /**

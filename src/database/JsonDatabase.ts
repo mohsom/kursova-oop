@@ -34,6 +34,14 @@ export class JSONDataBaseService<T extends { id: string }> extends DatabaseServi
             if (fs.existsSync(this.filePath)) {
                 const fileContent = fs.readFileSync(this.filePath, 'utf-8');
                 this.data = JSON.parse(fileContent);
+
+                // Конвертуємо рядки дат назад в Date об'єкти
+                this.data = this.data.map((item: any) => {
+                    if (item.subscriptionEndDate && typeof item.subscriptionEndDate === 'string') {
+                        item.subscriptionEndDate = new Date(item.subscriptionEndDate);
+                    }
+                    return item;
+                });
             } else {
                 this.data = [];
                 this.saveData();

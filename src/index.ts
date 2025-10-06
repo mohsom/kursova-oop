@@ -37,14 +37,14 @@ class Server {
     const transactionRepository = DatabaseFactory.createJSONService<TransactionData>('transactions');
 
     // Створення сервісів
-    const userService = new UserService(userRepository);
-    const planService = new SubscriptionPlanService(planRepository);
     const paymentSimulationService = new PaymentSimulationService(
       userRepository,
       subscriptionRepository,
       transactionRepository,
       planRepository
     );
+    const userService = new UserService(userRepository, paymentSimulationService);
+    const planService = new SubscriptionPlanService(planRepository);
 
     // Збереження сервісів в app locals для використання в роутах
     this.app.locals.userService = userService;
