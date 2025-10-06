@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { UserService, CreateUserData, UpdateUserData } from '../models/User';
 import { SubscriptionService, CreateSubscriptionData, UpdateSubscriptionData } from '../models/Subscription';
 import { SubscriptionPlanService, CreateSubscriptionPlanData, UpdateSubscriptionPlanData } from '../models/SubscriptionPlan';
+import { TransactionService, CreateTransactionData, UpdateTransactionData, TransactionType, TransactionStatus } from '../models/Transaction';
 import { WebhookHandler, WebhookEventType } from '../webhooks/WebhookHandler';
 
 /**
@@ -11,6 +12,7 @@ export function createRoutes(
   userService: UserService,
   subscriptionService: SubscriptionService,
   planService: SubscriptionPlanService,
+  transactionService: TransactionService,
   webhookHandler: WebhookHandler
 ): Router {
   const router = Router();
@@ -424,6 +426,206 @@ export function createRoutes(
     }
   });
 
+
+  // ========== TRANSACTION ROUTES ==========
+
+  /**
+   * GET /api/transactions - Отримати всі транзакції
+   */
+  router.get('/transactions', async (req: Request, res: Response) => {
+    try {
+      const transactions = await transactionService.getAllTransactions();
+      res.json({ success: true, data: transactions });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка отримання транзакцій',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * GET /api/transactions/:id - Отримати транзакцію за ID
+   */
+  router.get('/transactions/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const transaction = await transactionService.getTransactionById(id);
+
+      if (!transaction) {
+        return res.status(404).json({
+          success: false,
+          message: 'Транзакція не знайдена'
+        });
+      }
+
+      res.json({ success: true, data: transaction });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка отримання транзакції',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * GET /api/users/:userId/transactions - Отримати транзакції користувача
+   */
+  router.get('/users/:userId/transactions', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const transactions = await transactionService.getUserTransactions(userId);
+      res.json({ success: true, data: transactions });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка отримання транзакцій користувача',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * GET /api/subscriptions/:subscriptionId/transactions - Отримати транзакції підписки
+   */
+  router.get('/subscriptions/:subscriptionId/transactions', async (req: Request, res: Response) => {
+    try {
+      const { subscriptionId } = req.params;
+      const transactions = await transactionService.getSubscriptionTransactions(subscriptionId);
+      res.json({ success: true, data: transactions });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка отримання транзакцій підписки',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * POST /api/transactions - Створити нову транзакцію
+   */
+  router.post('/transactions', async (req: Request, res: Response) => {
+    try {
+      const transactionData: CreateTransactionData = req.body;
+
+      // Валідація обов'язкових полів
+      if (!transactionData.subscriptionId || !transactionData.userId || !transactionData.planId || !transactionData.amount) {
+        return res.status(400).json({
+          success: false,
+          message: 'subscriptionId, userId, planId та amount є обов\'язковими полями'
+        });
+      }
+
+      const transaction = await transactionService.createTransaction(transactionData);
+      res.status(201).json({ success: true, data: transaction });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка створення транзакції',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * PUT /api/transactions/:id - Оновити транзакцію
+   */
+  router.put('/transactions/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updateData: UpdateTransactionData = req.body;
+
+      const transaction = await transactionService.updateTransaction(id, updateData);
+
+      if (!transaction) {
+        return res.status(404).json({
+          success: false,
+          message: 'Транзакція не знайдена'
+        });
+      }
+
+      res.json({ success: true, data: transaction });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка оновлення транзакції',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * POST /api/transactions/:id/complete - Позначити транзакцію як завершену
+   */
+  router.post('/transactions/:id/complete', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const transaction = await transactionService.completeTransaction(id);
+
+      if (!transaction) {
+        return res.status(404).json({
+          success: false,
+          message: 'Транзакція не знайдена'
+        });
+      }
+
+      res.json({ success: true, data: transaction, message: 'Транзакція успішно завершена' });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка завершення транзакції',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * POST /api/transactions/:id/fail - Позначити транзакцію як невдалу
+   */
+  router.post('/transactions/:id/fail', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const transaction = await transactionService.failTransaction(id);
+
+      if (!transaction) {
+        return res.status(404).json({
+          success: false,
+          message: 'Транзакція не знайдена'
+        });
+      }
+
+      res.json({ success: true, data: transaction, message: 'Транзакція позначена як невдала' });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка оновлення статусу транзакції',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
+
+  /**
+   * GET /api/transactions/stats - Отримати статистику транзакцій
+   */
+  router.get('/transactions/stats', async (req: Request, res: Response) => {
+    try {
+      const { userId, planId } = req.query;
+      const stats = await transactionService.getTransactionStats(
+        userId as string,
+        planId as string
+      );
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Помилка отримання статистики',
+        error: error instanceof Error ? error.message : 'Невідома помилка'
+      });
+    }
+  });
 
   // ========== WEBHOOK ROUTES ==========
 

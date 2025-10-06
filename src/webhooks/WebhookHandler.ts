@@ -1,4 +1,5 @@
 import { SubscriptionService, SubscriptionStatus } from '../models/Subscription';
+import { TransactionService, TransactionType, TransactionStatus } from '../models/Transaction';
 
 /**
  * Типи webhook подій
@@ -24,7 +25,10 @@ export interface WebhookPayload {
  * Клас для обробки webhook подій
  */
 export class WebhookHandler {
-  constructor(private subscriptionService: SubscriptionService) {}
+  constructor(
+    private subscriptionService: SubscriptionService,
+    private transactionService: TransactionService
+  ) { }
 
   /**
    * Обробити webhook подію
@@ -36,13 +40,13 @@ export class WebhookHandler {
       switch (payload.event) {
         case WebhookEventType.PAYMENT_PROCESSED:
           return await this.handlePaymentProcessed(payload);
-        
+
         case WebhookEventType.PAYMENT_FAILED:
           return await this.handlePaymentFailed(payload);
-        
+
         case WebhookEventType.SUBSCRIPTION_CANCELLED:
           return await this.handleSubscriptionCancelled(payload);
-        
+
         default:
           return {
             success: false,
@@ -63,7 +67,7 @@ export class WebhookHandler {
    */
   private async handlePaymentProcessed(payload: WebhookPayload): Promise<{ success: boolean; message: string }> {
     const subscription = await this.subscriptionService.getSubscriptionById(payload.subscriptionId);
-    
+
     if (!subscription) {
       return {
         success: false,
@@ -78,8 +82,38 @@ export class WebhookHandler {
       };
     }
 
+    // Створюємо транзакцію для успішної оплати
+    try {
+      await this.transactionService.createTransaction({
+        subscriptionId: payload.subscriptionId,
+        userId: payload.userId,
+        planId: subscription.planId,
+        type: TransactionType.PAYMENT,
+        amount: subscription.price,
+        currency: 'USD', // Можна зробити динамічним
+        description: `Оплата підписки ${payload.subscriptionId}`,
+        paymentMethod: subscription.paymentMethod,
+        externalTransactionId: payload.metadata?.paymentId,
+        metadata: {
+          webhookEvent: payload.event,
+          webhookTimestamp: payload.timestamp,
+          ...payload.metadata
+        }
+      });
+
+      // Позначаємо транзакцію як завершену
+      const transactions = await this.transactionService.getSubscriptionTransactions(payload.subscriptionId);
+      const latestTransaction = transactions[transactions.length - 1];
+      if (latestTransaction) {
+        await this.transactionService.completeTransaction(latestTransaction.id);
+      }
+    } catch (error) {
+      console.error('Помилка створення транзакції:', error);
+      // Продовжуємо виконання, навіть якщо транзакція не створилася
+    }
+
     const updatedSubscription = await this.subscriptionService.activateSubscription(payload.subscriptionId);
-    
+
     if (!updatedSubscription) {
       return {
         success: false,
@@ -88,7 +122,7 @@ export class WebhookHandler {
     }
 
     console.log(`Підписка ${payload.subscriptionId} успішно активована після оплати`);
-    
+
     return {
       success: true,
       message: 'Підписка успішно активована'
@@ -100,7 +134,7 @@ export class WebhookHandler {
    */
   private async handlePaymentFailed(payload: WebhookPayload): Promise<{ success: boolean; message: string }> {
     const subscription = await this.subscriptionService.getSubscriptionById(payload.subscriptionId);
-    
+
     if (!subscription) {
       return {
         success: false,
@@ -115,8 +149,39 @@ export class WebhookHandler {
       };
     }
 
+    // Створюємо транзакцію для невдалої оплати
+    try {
+      await this.transactionService.createTransaction({
+        subscriptionId: payload.subscriptionId,
+        userId: payload.userId,
+        planId: subscription.planId,
+        type: TransactionType.PAYMENT,
+        amount: subscription.price,
+        currency: 'USD',
+        description: `Невдала оплата підписки ${payload.subscriptionId}`,
+        paymentMethod: subscription.paymentMethod,
+        externalTransactionId: payload.metadata?.paymentId,
+        metadata: {
+          webhookEvent: payload.event,
+          webhookTimestamp: payload.timestamp,
+          failureReason: payload.metadata?.reason,
+          ...payload.metadata
+        }
+      });
+
+      // Позначаємо транзакцію як невдалу
+      const transactions = await this.transactionService.getSubscriptionTransactions(payload.subscriptionId);
+      const latestTransaction = transactions[transactions.length - 1];
+      if (latestTransaction) {
+        await this.transactionService.failTransaction(latestTransaction.id);
+      }
+    } catch (error) {
+      console.error('Помилка створення транзакції:', error);
+      // Продовжуємо виконання, навіть якщо транзакція не створилася
+    }
+
     const updatedSubscription = await this.subscriptionService.markPaymentFailed(payload.subscriptionId);
-    
+
     if (!updatedSubscription) {
       return {
         success: false,
@@ -125,7 +190,7 @@ export class WebhookHandler {
     }
 
     console.log(`Підписка ${payload.subscriptionId} позначена як невдала оплата`);
-    
+
     return {
       success: true,
       message: 'Статус підписки оновлено на невдала оплата'
@@ -137,7 +202,7 @@ export class WebhookHandler {
    */
   private async handleSubscriptionCancelled(payload: WebhookPayload): Promise<{ success: boolean; message: string }> {
     const subscription = await this.subscriptionService.getSubscriptionById(payload.subscriptionId);
-    
+
     if (!subscription) {
       return {
         success: false,
@@ -153,7 +218,7 @@ export class WebhookHandler {
     }
 
     const updatedSubscription = await this.subscriptionService.cancelSubscription(payload.subscriptionId);
-    
+
     if (!updatedSubscription) {
       return {
         success: false,
@@ -162,7 +227,7 @@ export class WebhookHandler {
     }
 
     console.log(`Підписка ${payload.subscriptionId} успішно скасована`);
-    
+
     return {
       success: true,
       message: 'Підписка успішно скасована'
