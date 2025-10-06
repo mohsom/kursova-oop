@@ -3,6 +3,51 @@ import * as path from 'path';
 import { DatabaseService } from './DatabaseInterface';
 
 /**
+ * Утилітні функції для роботи з датами в JSON
+ */
+namespace DateUtils {
+    const DATE_FIELDS = [
+        'subscriptionEndDate',
+        'startDate',
+        'endDate',
+        'createdAt',
+        'updatedAt',
+        'completedAt',
+        'processedAt'
+    ];
+
+    /**
+     * Конвертує рядки дат в Date об'єкти
+     */
+    export function parseDates(item: any): any {
+        const convertedItem = { ...item };
+
+        DATE_FIELDS.forEach(field => {
+            if (convertedItem[field] && typeof convertedItem[field] === 'string') {
+                convertedItem[field] = new Date(convertedItem[field]);
+            }
+        });
+
+        return convertedItem;
+    }
+
+    /**
+     * Конвертує Date об'єкти в рядки для збереження
+     */
+    export function stringifyDates(item: any): any {
+        const convertedItem = { ...item };
+
+        DATE_FIELDS.forEach(field => {
+            if (convertedItem[field] instanceof Date) {
+                convertedItem[field] = convertedItem[field].toISOString();
+            }
+        });
+
+        return convertedItem;
+    }
+}
+
+/**
  * Реалізація доступу до бази даних через JSON файл
  */
 export class JSONDataBaseService<T extends { id: string }> extends DatabaseService<T> {
@@ -36,12 +81,7 @@ export class JSONDataBaseService<T extends { id: string }> extends DatabaseServi
                 this.data = JSON.parse(fileContent);
 
                 // Конвертуємо рядки дат назад в Date об'єкти
-                this.data = this.data.map((item: any) => {
-                    if (item.subscriptionEndDate && typeof item.subscriptionEndDate === 'string') {
-                        item.subscriptionEndDate = new Date(item.subscriptionEndDate);
-                    }
-                    return item;
-                });
+                this.data = this.data.map((item: any) => DateUtils.parseDates(item));
             } else {
                 this.data = [];
                 this.saveData();
@@ -57,7 +97,9 @@ export class JSONDataBaseService<T extends { id: string }> extends DatabaseServi
      */
     private saveData(): void {
         try {
-            fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2));
+            // Конвертуємо Date об'єкти в рядки для збереження
+            const dataToSave = this.data.map((item: any) => DateUtils.stringifyDates(item));
+            fs.writeFileSync(this.filePath, JSON.stringify(dataToSave, null, 2));
         } catch (error) {
             console.error(`Помилка збереження даних в ${this.filePath}:`, error);
         }
@@ -80,9 +122,11 @@ export class JSONDataBaseService<T extends { id: string }> extends DatabaseServi
 
     async create(data: Omit<T, 'id'>): Promise<T> {
         const newItem = { ...data, id: this.generateId() } as T;
-        this.data.push(newItem);
+        // Парсимо дати в новому елементі
+        const parsedItem = DateUtils.parseDates(newItem) as T;
+        this.data.push(parsedItem);
         this.saveData();
-        return newItem;
+        return parsedItem;
     }
 
     async update(id: string, data: Partial<T>): Promise<T | null> {
@@ -91,7 +135,9 @@ export class JSONDataBaseService<T extends { id: string }> extends DatabaseServi
             return null;
         }
 
-        this.data[index] = { ...this.data[index], ...data };
+        // Парсимо дати в оновлених даних
+        const parsedData = DateUtils.parseDates(data);
+        this.data[index] = { ...this.data[index], ...parsedData };
         this.saveData();
         return this.data[index];
     }
