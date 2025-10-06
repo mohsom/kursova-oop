@@ -1,21 +1,12 @@
-import React, { useState, useEffect } from "react";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Package,
-  DollarSign,
-  Calendar,
-} from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Plus, Edit, Trash2, Package } from "lucide-react";
 import { planApi } from "../services/api";
 import { SubscriptionPlan } from "../types";
 
 interface CreatePlanData {
   name: string;
-  description: string;
   price: number;
-  billingInterval: "monthly" | "yearly";
-  features: string[];
+  period: "monthly" | "yearly";
 }
 
 const PlanManagement: React.FC = () => {
@@ -26,18 +17,11 @@ const PlanManagement: React.FC = () => {
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [formData, setFormData] = useState<CreatePlanData>({
     name: "",
-    description: "",
     price: 0,
-    billingInterval: "monthly",
-    features: [],
+    period: "monthly",
   });
-  const [newFeature, setNewFeature] = useState("");
 
-  useEffect(() => {
-    loadPlans();
-  }, []);
-
-  const loadPlans = async () => {
+  const loadPlans = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -49,7 +33,11 @@ const PlanManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadPlans();
+  }, [loadPlans]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,19 +60,14 @@ const PlanManagement: React.FC = () => {
         const newPlan: SubscriptionPlan = {
           id: Date.now().toString(),
           ...formData,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
         };
         setPlans([...plans, newPlan]);
       }
 
       setFormData({
         name: "",
-        description: "",
         price: 0,
-        billingInterval: "monthly",
-        features: [],
+        period: "monthly",
       });
       setShowForm(false);
       setEditingPlan(null);
@@ -98,10 +81,8 @@ const PlanManagement: React.FC = () => {
     setEditingPlan(plan);
     setFormData({
       name: plan.name,
-      description: plan.description,
       price: plan.price,
-      billingInterval: plan.billingInterval,
-      features: plan.features || [],
+      period: plan.period,
     });
     setShowForm(true);
   };
@@ -123,45 +104,8 @@ const PlanManagement: React.FC = () => {
     setEditingPlan(null);
     setFormData({
       name: "",
-      description: "",
       price: 0,
-      billingInterval: "monthly",
-      features: [],
-    });
-    setNewFeature("");
-  };
-
-  const addFeature = () => {
-    if (newFeature.trim()) {
-      setFormData({
-        ...formData,
-        features: [...formData.features, newFeature.trim()],
-      });
-      setNewFeature("");
-    }
-  };
-
-  const removeFeature = (index: number) => {
-    setFormData({
-      ...formData,
-      features: formData.features.filter((_, i) => i !== index),
-    });
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("uk-UA", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      period: "monthly",
     });
   };
 
@@ -214,27 +158,10 @@ const PlanManagement: React.FC = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="plan-description" className="form-label">
-                Опис
-              </label>
-              <textarea
-                id="plan-description"
-                className="form-input"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                required
-                rows={3}
-                placeholder="Опис плану підписки"
-              />
-            </div>
-
             <div className="grid grid-2">
               <div className="form-group">
                 <label htmlFor="plan-price" className="form-label">
-                  Ціна (USD)
+                  Ціна (грн)
                 </label>
                 <input
                   id="plan-price"
@@ -250,22 +177,22 @@ const PlanManagement: React.FC = () => {
                   required
                   min="0"
                   step="0.01"
-                  placeholder="29.99"
+                  placeholder="299.99"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="plan-interval" className="form-label">
-                  Період оплати
+                <label htmlFor="plan-period" className="form-label">
+                  Період
                 </label>
                 <select
-                  id="plan-interval"
+                  id="plan-period"
                   className="form-select"
-                  value={formData.billingInterval}
+                  value={formData.period}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      billingInterval: e.target.value as "monthly" | "yearly",
+                      period: e.target.value as "monthly" | "yearly",
                     })
                   }
                 >
@@ -273,67 +200,6 @@ const PlanManagement: React.FC = () => {
                   <option value="yearly">Річний</option>
                 </select>
               </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Функції плану</label>
-              <div
-                style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}
-              >
-                <input
-                  type="text"
-                  className="form-input"
-                  value={newFeature}
-                  onChange={(e) => setNewFeature(e.target.value)}
-                  placeholder="Додати функцію"
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addFeature())
-                  }
-                />
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={addFeature}
-                >
-                  Додати
-                </button>
-              </div>
-
-              {formData.features.length > 0 && (
-                <div
-                  style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}
-                >
-                  {formData.features.map((feature, index) => (
-                    <span
-                      key={index}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        padding: "0.5rem",
-                        background: "#e9ecef",
-                        borderRadius: "6px",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      {feature}
-                      <button
-                        type="button"
-                        onClick={() => removeFeature(index)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#dc3545",
-                          cursor: "pointer",
-                          fontSize: "1rem",
-                        }}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
 
             <div style={{ display: "flex", gap: "1rem" }}>
@@ -351,108 +217,46 @@ const PlanManagement: React.FC = () => {
           </form>
         )}
 
-        <div className="grid grid-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className="card"
-              style={{ position: "relative" }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h3 style={{ margin: 0, color: "#2c3e50" }}>{plan.name}</h3>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-secondary"
-                    onClick={() => handleEdit(plan)}
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(plan.id)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <p style={{ color: "#6c757d", marginBottom: "1rem" }}>
-                {plan.description}
-              </p>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "1rem",
-                }}
-              >
-                <DollarSign size={20} color="#28a745" />
-                <span
-                  style={{
-                    fontSize: "1.5rem",
-                    fontWeight: "bold",
-                    color: "#28a745",
-                  }}
-                >
-                  {formatPrice(plan.price)}
-                </span>
-                <span style={{ color: "#6c757d" }}>
-                  /{plan.billingInterval === "monthly" ? "місяць" : "рік"}
-                </span>
-              </div>
-
-              {plan.features && plan.features.length > 0 && (
-                <div style={{ marginBottom: "1rem" }}>
-                  <h4 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-                    Функції:
-                  </h4>
-                  <ul
-                    style={{
-                      margin: 0,
-                      paddingLeft: "1.5rem",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    {plan.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  paddingTop: "1rem",
-                  borderTop: "1px solid #e1e5e9",
-                  fontSize: "0.875rem",
-                  color: "#6c757d",
-                }}
-              >
-                <span
-                  className={`status-badge ${
-                    plan.isActive ? "status-active" : "status-cancelled"
-                  }`}
-                >
-                  {plan.isActive ? "Активний" : "Неактивний"}
-                </span>
-                <span>Створено: {formatDate(plan.createdAt)}</span>
-              </div>
-            </div>
-          ))}
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Назва</th>
+                <th>Ціна</th>
+                <th>Період</th>
+                <th>Дії</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plans.map((plan) => (
+                <tr key={plan.id}>
+                  <td>{plan.id}</td>
+                  <td>{plan.name}</td>
+                  <td>{plan.price} грн</td>
+                  <td>{plan.period === "monthly" ? "Місячний" : "Річний"}</td>
+                  <td>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => handleEdit(plan)}
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(plan.id)}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {plans.length === 0 && (

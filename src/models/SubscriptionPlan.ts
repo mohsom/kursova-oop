@@ -1,105 +1,40 @@
 
 /**
- * Інтерфейс плану підписки
+ * Клас SubscriptionPlan - містить інформацію про назву, ціну та період (рік/місяць)
  */
-export interface SubscriptionPlan {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    billingInterval: 'monthly' | 'yearly';
-    features: string[];
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-/**
- * Дані для створення плану підписки
- */
-export interface CreateSubscriptionPlanData {
-    name: string;
-    description: string;
-    price: number;
-    billingInterval: 'monthly' | 'yearly';
-    features: string[];
-}
-
-/**
- * Дані для оновлення плану підписки
- */
-export interface UpdateSubscriptionPlanData {
-    name?: string;
-    description?: string;
-    price?: number;
-    billingInterval?: 'monthly' | 'yearly';
-    features?: string[];
-}
-
-/**
- * Клас для роботи з планами підписок
- */
-export class SubscriptionPlanService {
-    constructor(private planRepository: any) { }
+export class SubscriptionPlan {
+    constructor(
+        public id: string,
+        public name: string,
+        public price: number,
+        public period: 'monthly' | 'yearly'
+    ) { }
 
     /**
-     * Створити новий план підписки
+     * Отримати ціну за місяць
      */
-    async createPlan(planData: CreateSubscriptionPlanData): Promise<SubscriptionPlan> {
-        const now = new Date();
-        const plan: Omit<SubscriptionPlan, 'id'> = {
-            name: planData.name,
-            description: planData.description,
-            price: planData.price,
-            billingInterval: planData.billingInterval,
-            features: planData.features,
-            createdAt: now,
-            updatedAt: now
-        };
-
-        return await this.planRepository.create(plan);
+    getMonthlyPrice(): number {
+        return this.period === 'monthly' ? this.price : this.price / 12;
     }
 
     /**
-     * Отримати план за ID
+     * Отримати ціну за рік
      */
-    async getPlanById(id: string): Promise<SubscriptionPlan | null> {
-        return await this.planRepository.findById(id);
+    getYearlyPrice(): number {
+        return this.period === 'yearly' ? this.price : this.price * 12;
     }
 
     /**
-     * Отримати всі плани
+     * Перевірити чи план є щомісячним
      */
-    async getAllPlans(): Promise<SubscriptionPlan[]> {
-        return await this.planRepository.findAll();
+    isMonthly(): boolean {
+        return this.period === 'monthly';
     }
 
-
-
     /**
-     * Оновити план
+     * Перевірити чи план є річним
      */
-    async updatePlan(id: string, updateData: UpdateSubscriptionPlanData): Promise<SubscriptionPlan | null> {
-        const updateDataWithTimestamp = {
-            ...updateData,
-            updatedAt: new Date()
-        };
-        return await this.planRepository.update(id, updateDataWithTimestamp);
-    }
-
-
-    /**
-     * Видалити план
-     */
-    async deletePlan(id: string): Promise<boolean> {
-        return await this.planRepository.delete(id);
-    }
-
-
-    /**
-     * Отримати план за назвою
-     */
-    async getPlanByName(name: string): Promise<SubscriptionPlan | null> {
-        const plans = await this.planRepository.findBy({ name });
-        return plans.length > 0 ? plans[0] : null;
+    isYearly(): boolean {
+        return this.period === 'yearly';
     }
 }

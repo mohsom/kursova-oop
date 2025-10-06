@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, User as UserIcon } from "lucide-react";
 import { userApi } from "../services/api";
 import { User, CreateUserData } from "../types";
@@ -14,11 +14,7 @@ const UserManagement: React.FC = () => {
     email: "",
   });
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -30,7 +26,11 @@ const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,16 +82,6 @@ const UserManagement: React.FC = () => {
     setShowForm(false);
     setEditingUser(null);
     setFormData({ name: "", email: "" });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("uk-UA", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
   if (loading) {
@@ -179,28 +169,26 @@ const UserManagement: React.FC = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>Ім'я</th>
                 <th>Email</th>
-                <th>Статус</th>
-                <th>Створено</th>
+                <th>Ім'я</th>
+                <th>Назва плану</th>
+                <th>Статус плану</th>
+                <th>Дата закінчення</th>
                 <th>Дії</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
                 <tr key={user.id}>
-                  <td>{user.name}</td>
                   <td>{user.email}</td>
+                  <td>{user.name}</td>
+                  <td>Немає підписки</td>
                   <td>
-                    <span
-                      className={`status-badge ${
-                        user.isActive ? "status-active" : "status-cancelled"
-                      }`}
-                    >
-                      {user.isActive ? "Активний" : "Неактивний"}
+                    <span className="status-badge status-cancelled">
+                      Неактивний
                     </span>
                   </td>
-                  <td>{formatDate(user.createdAt)}</td>
+                  <td>-</td>
                   <td>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <button

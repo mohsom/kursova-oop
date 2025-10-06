@@ -15,13 +15,8 @@ export interface CreateUserData {
 export interface SubscriptionPlan {
   id: string;
   name: string;
-  description: string;
-  price: number; // в USD
-  billingInterval: 'monthly' | 'yearly';
-  features: string[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  price: number; // в грн
+  period: 'monthly' | 'yearly';
 }
 
 export interface Subscription {
@@ -74,19 +69,8 @@ export interface CreateTransactionData {
 
 export interface TransactionStats {
   totalTransactions: number;
-  totalRevenue: number;
-  successfulTransactions: number;
-  failedTransactions: number;
-  monthlyRevenue: Array<{
-    month: string;
-    revenue: number;
-  }>;
-  planStats: Array<{
-    planId: string;
-    planName: string;
-    subscriptions: number;
-    revenue: number;
-  }>;
+  totalAmount: number;
+  averageAmount: number;
 }
 
 export interface ApiResponse<T> {

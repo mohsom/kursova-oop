@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { DatabaseInterface } from './DatabaseInterface';
+import { DatabaseService } from './DatabaseInterface';
 
 /**
  * Реалізація доступу до бази даних через JSON файл
  */
-export class JsonDatabase<T extends { id: string }> extends DatabaseInterface<T> {
+export class JSONDataBaseService<T extends { id: string }> extends DatabaseService<T> {
     private filePath: string;
     private data: T[] = [];
 

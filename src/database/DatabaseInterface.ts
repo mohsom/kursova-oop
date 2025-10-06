@@ -1,8 +1,8 @@
 /**
- * Абстрактний клас для доступу до бази даних
+ * Абстрактний клас для роботи з базою даних
  * Визначає базовий інтерфейс для роботи з даними
  */
-export abstract class DatabaseInterface<T> {
+export abstract class DatabaseService<T> {
   /**
    * Отримати всі записи
    */

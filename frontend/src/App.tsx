@@ -1,30 +1,12 @@
 import React, { useState } from "react";
-import {
-  Users,
-  CreditCard,
-  BarChart3,
-  Shield,
-  Plus,
-  ShoppingCart,
-  Package,
-} from "lucide-react";
+import { Users, CreditCard, BarChart3, Package } from "lucide-react";
 import UserManagement from "./components/UserManagement";
 import PlanManagement from "./components/PlanManagement";
-import SubscriptionManagement from "./components/SubscriptionManagement";
-import PaymentSimulation from "./components/PaymentSimulation";
-import PaddlePayment from "./components/PaddlePayment";
-import LicenseCheck from "./components/LicenseCheck";
-import TransactionStats from "./components/TransactionStats";
+import PaymentSimulationNew from "./components/PaymentSimulationNew";
+import TransactionStatsNew from "./components/TransactionStatsNew";
 import "./App.css";
 
-type TabType =
-  | "users"
-  | "plans"
-  | "subscriptions"
-  | "payment"
-  | "paddle"
-  | "license"
-  | "stats";
+type TabType = "users" | "plans" | "payment" | "stats";
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("users");
@@ -32,10 +14,7 @@ const App: React.FC = () => {
   const tabs = [
     { id: "users" as TabType, label: "Користувачі", icon: Users },
     { id: "plans" as TabType, label: "Плани", icon: Package },
-    { id: "subscriptions" as TabType, label: "Підписки", icon: CreditCard },
-    { id: "payment" as TabType, label: "Оплата (стара)", icon: Plus },
-    { id: "paddle" as TabType, label: "Paddle Оплата", icon: ShoppingCart },
-    { id: "license" as TabType, label: "Ліцензії", icon: Shield },
+    { id: "payment" as TabType, label: "Симуляція оплати", icon: CreditCard },
     { id: "stats" as TabType, label: "Статистика", icon: BarChart3 },
   ];
 
@@ -45,16 +24,10 @@ const App: React.FC = () => {
         return <UserManagement />;
       case "plans":
         return <PlanManagement />;
-      case "subscriptions":
-        return <SubscriptionManagement />;
       case "payment":
-        return <PaymentSimulation />;
-      case "paddle":
-        return <PaddlePayment />;
-      case "license":
-        return <LicenseCheck />;
+        return <PaymentSimulationNew />;
       case "stats":
-        return <TransactionStats />;
+        return <TransactionStatsNew />;
       default:
         return <UserManagement />;
     }

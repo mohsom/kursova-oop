@@ -1,17 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
-import { JsonDatabase } from './database/JsonDatabase';
-import { UserService } from './models/User';
-import { SubscriptionService } from './models/Subscription';
-import { SubscriptionPlanService } from './models/SubscriptionPlan';
-import { TransactionService } from './models/Transaction';
-import { WebhookHandler } from './webhooks/WebhookHandler';
+import { DatabaseFactory } from './database/DatabaseFactory';
+import { UserService } from './services/UserService';
+import { SubscriptionPlanService } from './services/SubscriptionPlanService';
+import { PaymentSimulationService } from './services/PaymentSimulationService';
 import { createRoutes } from './api/routes';
+import { UserData, SubscriptionPlanData, UserSubscriptionData, TransactionData } from './types/DatabaseTypes';
 
-// Завантажуємо environment змінні
-dotenv.config();
 
 /**
  * Головний файл сервера
@@ -34,25 +30,26 @@ class Server {
   private initializeDatabase(): void {
     console.log('Ініціалізація бази даних...');
 
-    // Створення репозиторіїв
-    const userRepository = new JsonDatabase('users');
-    const subscriptionRepository = new JsonDatabase('subscriptions');
-    const planRepository = new JsonDatabase('subscription_plans');
-    const transactionRepository = new JsonDatabase('transactions');
+    // Створення репозиторіїв через фабрику
+    const userRepository = DatabaseFactory.createJSONService<UserData>('users');
+    const subscriptionRepository = DatabaseFactory.createJSONService<UserSubscriptionData>('user_subscriptions');
+    const planRepository = DatabaseFactory.createJSONService<SubscriptionPlanData>('subscription_plans');
+    const transactionRepository = DatabaseFactory.createJSONService<TransactionData>('transactions');
 
     // Створення сервісів
     const userService = new UserService(userRepository);
     const planService = new SubscriptionPlanService(planRepository);
-    const subscriptionService = new SubscriptionService(subscriptionRepository, planRepository);
-    const transactionService = new TransactionService(transactionRepository);
-    const webhookHandler = new WebhookHandler(subscriptionService, transactionService);
+    const paymentSimulationService = new PaymentSimulationService(
+      userRepository,
+      subscriptionRepository,
+      transactionRepository,
+      planRepository
+    );
 
     // Збереження сервісів в app locals для використання в роутах
     this.app.locals.userService = userService;
     this.app.locals.planService = planService;
-    this.app.locals.subscriptionService = subscriptionService;
-    this.app.locals.transactionService = transactionService;
-    this.app.locals.webhookHandler = webhookHandler;
+    this.app.locals.paymentSimulationService = paymentSimulationService;
 
     console.log('База даних ініціалізована');
   }
@@ -73,7 +70,7 @@ class Server {
     this.app.use(bodyParser.urlencoded({ extended: true }));
 
     // Логування запитів
-    this.app.use((req, res, next) => {
+    this.app.use((req, _res, next) => {
       console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
       next();
     });
@@ -83,13 +80,13 @@ class Server {
    * Ініціалізація роутів
    */
   private initializeRoutes(): void {
-    const { userService, planService, subscriptionService, transactionService, webhookHandler } = this.app.locals;
+    const { userService, planService, paymentSimulationService } = this.app.locals;
 
     // API роути
-    this.app.use('/api', createRoutes(userService, subscriptionService, planService, transactionService, webhookHandler));
+    this.app.use('/api', createRoutes(userService, planService, paymentSimulationService));
 
     // Головна сторінка
-    this.app.get('/', (req, res) => {
+    this.app.get('/', (_req, res) => {
       res.json({
         message: 'SaaS Subscription Management System',
         version: '1.0.0',
@@ -102,7 +99,7 @@ class Server {
     });
 
     // Обробка неіснуючих роутів
-    this.app.use('*', (req, res) => {
+    this.app.use('*', (_req, res) => {
       res.status(404).json({
         success: false,
         message: 'Endpoint не знайдений'
@@ -129,23 +126,10 @@ class Server {
       console.log('  POST   /api/plans                     - Створити план підписки');
       console.log('  PUT    /api/plans/:id                 - Оновити план підписки');
       console.log('  DELETE /api/plans/:id                 - Видалити план');
-      console.log('  GET    /api/subscriptions             - Отримати всі підписки');
-      console.log('  GET    /api/subscriptions/:id         - Отримати підписку за ID');
-      console.log('  POST   /api/subscriptions             - Створити підписку');
-      console.log('  PUT    /api/subscriptions/:id         - Оновити підписку');
-      console.log('  POST   /api/subscriptions/:id/cancel  - Скасувати підписку');
-      console.log('  GET    /api/users/:userId/subscriptions - Підписки користувача');
-      console.log('  GET    /api/transactions             - Отримати всі транзакції');
-      console.log('  GET    /api/transactions/:id         - Отримати транзакцію за ID');
-      console.log('  POST   /api/transactions             - Створити транзакцію');
-      console.log('  PUT    /api/transactions/:id         - Оновити транзакцію');
-      console.log('  POST   /api/transactions/:id/complete - Завершити транзакцію');
-      console.log('  POST   /api/transactions/:id/fail    - Позначити як невдалу');
-      console.log('  GET    /api/transactions/stats       - Статистика транзакцій');
-      console.log('  GET    /api/users/:userId/transactions - Транзакції користувача');
-      console.log('  GET    /api/subscriptions/:id/transactions - Транзакції підписки');
-      console.log('  POST   /api/webhooks                  - Webhook обробка');
-      console.log('  POST   /api/webhooks/test             - Тестовий webhook');
+      console.log('  POST   /api/payment/simulate         - Симуляція оплати');
+      console.log('  GET    /api/payment/user/:email/subscriptions - Підписки користувача');
+      console.log('  GET    /api/payment/user/:email/transactions - Транзакції користувача');
+      console.log('  GET    /api/payment/stats             - Статистика транзакцій');
     });
   }
 }

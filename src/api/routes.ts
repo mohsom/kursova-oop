@@ -1,19 +1,15 @@
 import { Router, Request, Response } from 'express';
-import { UserService, CreateUserData, UpdateUserData } from '../models/User';
-import { SubscriptionService, CreateSubscriptionData, UpdateSubscriptionData } from '../models/Subscription';
-import { SubscriptionPlanService, CreateSubscriptionPlanData, UpdateSubscriptionPlanData } from '../models/SubscriptionPlan';
-import { TransactionService, CreateTransactionData, UpdateTransactionData, TransactionType, TransactionStatus } from '../models/Transaction';
-import { WebhookHandler, WebhookEventType } from '../webhooks/WebhookHandler';
+import { UserService } from '../services/UserService';
+import { SubscriptionPlanService } from '../services/SubscriptionPlanService';
+import { PaymentSimulationService } from '../services/PaymentSimulationService';
 
 /**
  * Створення роутерів для API
  */
 export function createRoutes(
   userService: UserService,
-  subscriptionService: SubscriptionService,
   planService: SubscriptionPlanService,
-  transactionService: TransactionService,
-  webhookHandler: WebhookHandler
+  paymentSimulationService: PaymentSimulationService
 ): Router {
   const router = Router();
 
@@ -22,7 +18,7 @@ export function createRoutes(
   /**
    * GET /api/users - Отримати всіх користувачів
    */
-  router.get('/users', async (req: Request, res: Response) => {
+  router.get('/users', async (_req: Request, res: Response) => {
     try {
       const users = await userService.getAllUsers();
       res.json({ success: true, data: users });
@@ -65,10 +61,10 @@ export function createRoutes(
    */
   router.post('/users', async (req: Request, res: Response) => {
     try {
-      const userData: CreateUserData = req.body;
+      const { name, email } = req.body;
 
       // Валідація обов'язкових полів
-      if (!userData.email || !userData.name) {
+      if (!email || !name) {
         return res.status(400).json({
           success: false,
           message: 'Email та ім\'я є обов\'язковими полями'
@@ -76,7 +72,7 @@ export function createRoutes(
       }
 
       // Перевірка чи користувач з таким email вже існує
-      const existingUser = await userService.getUserByEmail(userData.email);
+      const existingUser = await userService.getUserByEmail(email);
       if (existingUser) {
         return res.status(409).json({
           success: false,
@@ -84,7 +80,7 @@ export function createRoutes(
         });
       }
 
-      const user = await userService.createUser(userData);
+      const user = await userService.createUser(name, email);
       res.status(201).json({ success: true, data: user });
     } catch (error) {
       res.status(500).json({
@@ -101,9 +97,9 @@ export function createRoutes(
   router.put('/users/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const updateData: UpdateUserData = req.body;
+      const { name, email } = req.body;
 
-      const user = await userService.updateUser(id, updateData);
+      const user = await userService.updateUser(id, name, email);
 
       if (!user) {
         return res.status(404).json({
@@ -152,7 +148,7 @@ export function createRoutes(
   /**
    * GET /api/plans - Отримати всі плани підписок
    */
-  router.get('/plans', async (req: Request, res: Response) => {
+  router.get('/plans', async (_req: Request, res: Response) => {
     try {
       const plans = await planService.getAllPlans();
       res.json({ success: true, data: plans });
@@ -196,17 +192,24 @@ export function createRoutes(
    */
   router.post('/plans', async (req: Request, res: Response) => {
     try {
-      const planData: CreateSubscriptionPlanData = req.body;
+      const { name, price, period } = req.body;
 
       // Валідація обов'язкових полів
-      if (!planData.name || !planData.price || !planData.billingInterval) {
+      if (!name || !price || !period) {
         return res.status(400).json({
           success: false,
-          message: 'name, price та billingInterval є обов\'язковими полями'
+          message: 'name, price та period є обов\'язковими полями'
         });
       }
 
-      const plan = await planService.createPlan(planData);
+      if (period !== 'monthly' && period !== 'yearly') {
+        return res.status(400).json({
+          success: false,
+          message: 'period має бути "monthly" або "yearly"'
+        });
+      }
+
+      const plan = await planService.createPlan(name, price, period);
       res.status(201).json({ success: true, data: plan });
     } catch (error) {
       res.status(500).json({
@@ -223,9 +226,9 @@ export function createRoutes(
   router.put('/plans/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const updateData: UpdateSubscriptionPlanData = req.body;
+      const { name, price, period } = req.body;
 
-      const plan = await planService.updatePlan(id, updateData);
+      const plan = await planService.updatePlan(id, name, price, period);
 
       if (!plan) {
         return res.status(404).json({
@@ -270,56 +273,41 @@ export function createRoutes(
     }
   });
 
-  // ========== SUBSCRIPTION ROUTES ==========
+  // ========== PAYMENT SIMULATION ROUTES ==========
 
   /**
-   * GET /api/subscriptions - Отримати всі підписки
+   * POST /api/payment/simulate - Симуляція оплати
    */
-  router.get('/subscriptions', async (req: Request, res: Response) => {
+  router.post('/payment/simulate', async (req: Request, res: Response) => {
     try {
-      const subscriptions = await subscriptionService.getAllSubscriptions();
-      res.json({ success: true, data: subscriptions });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання підписок',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
+      const { userEmail, subscriptionPlanId, amount } = req.body;
 
-  /**
-   * GET /api/subscriptions/:id - Отримати підписку за ID
-   */
-  router.get('/subscriptions/:id', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const subscription = await subscriptionService.getSubscriptionById(id);
-
-      if (!subscription) {
-        return res.status(404).json({
+      // Валідація обов'язкових полів
+      if (!userEmail || !subscriptionPlanId || !amount) {
+        return res.status(400).json({
           success: false,
-          message: 'Підписка не знайдена'
+          message: 'userEmail, subscriptionPlanId та amount є обов\'язковими полями'
         });
       }
 
-      res.json({ success: true, data: subscription });
+      const result = await paymentSimulationService.simulatePayment(userEmail, subscriptionPlanId, amount);
+      res.status(201).json({ success: true, data: result });
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: 'Помилка отримання підписки',
+        message: 'Помилка симуляції оплати',
         error: error instanceof Error ? error.message : 'Невідома помилка'
       });
     }
   });
 
   /**
-   * GET /api/users/:userId/subscriptions - Отримати підписки користувача
+   * GET /api/payment/user/:email/subscriptions - Отримати підписки користувача
    */
-  router.get('/users/:userId/subscriptions', async (req: Request, res: Response) => {
+  router.get('/payment/user/:email/subscriptions', async (req: Request, res: Response) => {
     try {
-      const { userId } = req.params;
-      const subscriptions = await subscriptionService.getUserSubscriptions(userId);
+      const { email } = req.params;
+      const subscriptions = await paymentSimulationService.getUserSubscriptions(email);
       res.json({ success: true, data: subscriptions });
     } catch (error) {
       res.status(500).json({
@@ -331,152 +319,12 @@ export function createRoutes(
   });
 
   /**
-   * POST /api/subscriptions - Створити нову підписку
+   * GET /api/payment/user/:email/transactions - Отримати транзакції користувача
    */
-  router.post('/subscriptions', async (req: Request, res: Response) => {
+  router.get('/payment/user/:email/transactions', async (req: Request, res: Response) => {
     try {
-      const subscriptionData: CreateSubscriptionData = req.body;
-
-      // Валідація обов'язкових полів
-      if (!subscriptionData.userId || !subscriptionData.planId) {
-        return res.status(400).json({
-          success: false,
-          message: 'userId та planId є обов\'язковими полями'
-        });
-      }
-
-      // Перевірка чи користувач існує
-      const user = await userService.getUserById(subscriptionData.userId);
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: 'Користувач не знайдений'
-        });
-      }
-
-      // Перевірка чи план існує
-      const plan = await planService.getPlanById(subscriptionData.planId);
-      if (!plan) {
-        return res.status(404).json({
-          success: false,
-          message: 'План підписки не знайдений'
-        });
-      }
-
-      const subscription = await subscriptionService.createSubscription(subscriptionData);
-      res.status(201).json({ success: true, data: subscription });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка створення підписки',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * PUT /api/subscriptions/:id - Оновити підписку
-   */
-  router.put('/subscriptions/:id', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const updateData: UpdateSubscriptionData = req.body;
-
-      const subscription = await subscriptionService.updateSubscription(id, updateData);
-
-      if (!subscription) {
-        return res.status(404).json({
-          success: false,
-          message: 'Підписка не знайдена'
-        });
-      }
-
-      res.json({ success: true, data: subscription });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка оновлення підписки',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * POST /api/subscriptions/:id/cancel - Скасувати підписку
-   */
-  router.post('/subscriptions/:id/cancel', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const subscription = await subscriptionService.cancelSubscription(id);
-
-      if (!subscription) {
-        return res.status(404).json({
-          success: false,
-          message: 'Підписка не знайдена'
-        });
-      }
-
-      res.json({ success: true, data: subscription, message: 'Підписка успішно скасована' });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка скасування підписки',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-
-  // ========== TRANSACTION ROUTES ==========
-
-  /**
-   * GET /api/transactions - Отримати всі транзакції
-   */
-  router.get('/transactions', async (req: Request, res: Response) => {
-    try {
-      const transactions = await transactionService.getAllTransactions();
-      res.json({ success: true, data: transactions });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання транзакцій',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * GET /api/transactions/:id - Отримати транзакцію за ID
-   */
-  router.get('/transactions/:id', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const transaction = await transactionService.getTransactionById(id);
-
-      if (!transaction) {
-        return res.status(404).json({
-          success: false,
-          message: 'Транзакція не знайдена'
-        });
-      }
-
-      res.json({ success: true, data: transaction });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання транзакції',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * GET /api/users/:userId/transactions - Отримати транзакції користувача
-   */
-  router.get('/users/:userId/transactions', async (req: Request, res: Response) => {
-    try {
-      const { userId } = req.params;
-      const transactions = await transactionService.getUserTransactions(userId);
+      const { email } = req.params;
+      const transactions = await paymentSimulationService.getUserTransactions(email);
       res.json({ success: true, data: transactions });
     } catch (error) {
       res.status(500).json({
@@ -488,135 +336,11 @@ export function createRoutes(
   });
 
   /**
-   * GET /api/subscriptions/:subscriptionId/transactions - Отримати транзакції підписки
+   * GET /api/payment/stats - Отримати статистику транзакцій
    */
-  router.get('/subscriptions/:subscriptionId/transactions', async (req: Request, res: Response) => {
+  router.get('/payment/stats', async (_req: Request, res: Response) => {
     try {
-      const { subscriptionId } = req.params;
-      const transactions = await transactionService.getSubscriptionTransactions(subscriptionId);
-      res.json({ success: true, data: transactions });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання транзакцій підписки',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * POST /api/transactions - Створити нову транзакцію
-   */
-  router.post('/transactions', async (req: Request, res: Response) => {
-    try {
-      const transactionData: CreateTransactionData = req.body;
-
-      // Валідація обов'язкових полів
-      if (!transactionData.subscriptionId || !transactionData.userId || !transactionData.planId || !transactionData.amount) {
-        return res.status(400).json({
-          success: false,
-          message: 'subscriptionId, userId, planId та amount є обов\'язковими полями'
-        });
-      }
-
-      const transaction = await transactionService.createTransaction(transactionData);
-      res.status(201).json({ success: true, data: transaction });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка створення транзакції',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * PUT /api/transactions/:id - Оновити транзакцію
-   */
-  router.put('/transactions/:id', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const updateData: UpdateTransactionData = req.body;
-
-      const transaction = await transactionService.updateTransaction(id, updateData);
-
-      if (!transaction) {
-        return res.status(404).json({
-          success: false,
-          message: 'Транзакція не знайдена'
-        });
-      }
-
-      res.json({ success: true, data: transaction });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка оновлення транзакції',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * POST /api/transactions/:id/complete - Позначити транзакцію як завершену
-   */
-  router.post('/transactions/:id/complete', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const transaction = await transactionService.completeTransaction(id);
-
-      if (!transaction) {
-        return res.status(404).json({
-          success: false,
-          message: 'Транзакція не знайдена'
-        });
-      }
-
-      res.json({ success: true, data: transaction, message: 'Транзакція успішно завершена' });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка завершення транзакції',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * POST /api/transactions/:id/fail - Позначити транзакцію як невдалу
-   */
-  router.post('/transactions/:id/fail', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const transaction = await transactionService.failTransaction(id);
-
-      if (!transaction) {
-        return res.status(404).json({
-          success: false,
-          message: 'Транзакція не знайдена'
-        });
-      }
-
-      res.json({ success: true, data: transaction, message: 'Транзакція позначена як невдала' });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка оновлення статусу транзакції',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * GET /api/transactions/stats - Отримати статистику транзакцій
-   */
-  router.get('/transactions/stats', async (req: Request, res: Response) => {
-    try {
-      const { userId, planId } = req.query;
-      const stats = await transactionService.getTransactionStats(
-        userId as string,
-        planId as string
-      );
+      const stats = await paymentSimulationService.getTransactionStats();
       res.json({ success: true, data: stats });
     } catch (error) {
       res.status(500).json({
@@ -627,74 +351,6 @@ export function createRoutes(
     }
   });
 
-  // ========== WEBHOOK ROUTES ==========
-
-  /**
-   * POST /api/webhooks - Обробити webhook
-   */
-  router.post('/webhooks', async (req: Request, res: Response) => {
-    try {
-      const payload = req.body;
-
-      // Валідація payload
-      if (!webhookHandler.validateWebhookPayload(payload)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Невірний формат webhook payload'
-        });
-      }
-
-      const result = await webhookHandler.handleWebhook(payload);
-
-      if (result.success) {
-        res.json({ success: true, message: result.message });
-      } else {
-        res.status(400).json({ success: false, message: result.message });
-      }
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка обробки webhook',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * POST /api/webhooks/test - Тестовий webhook для демонстрації
-   */
-  router.post('/webhooks/test', async (req: Request, res: Response) => {
-    try {
-      const { event, subscriptionId, userId } = req.body;
-
-      if (!event || !subscriptionId || !userId) {
-        return res.status(400).json({
-          success: false,
-          message: 'event, subscriptionId та userId є обов\'язковими полями'
-        });
-      }
-
-      const payload = webhookHandler.createTestWebhookPayload(
-        event as WebhookEventType,
-        subscriptionId,
-        userId
-      );
-
-      const result = await webhookHandler.handleWebhook(payload);
-
-      if (result.success) {
-        res.json({ success: true, message: result.message, payload });
-      } else {
-        res.status(400).json({ success: false, message: result.message });
-      }
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка обробки тестового webhook',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
 
   return router;
 }

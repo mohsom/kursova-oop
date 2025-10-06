@@ -1,104 +1,51 @@
-/**
- * Клас користувача
- */
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
-  isActive: boolean;
-}
+import { UserSubscription } from './UserSubscription';
 
 /**
- * Дані для створення користувача
+ * Клас User - містить інформацію про ім'я, пошту та посилання на UserSubscription
  */
-export interface CreateUserData {
-  email: string;
-  name: string;
-}
+export class User {
+  private userSubscription?: UserSubscription;
 
-/**
- * Дані для оновлення користувача
- */
-export interface UpdateUserData {
-  email?: string;
-  name?: string;
-  isActive?: boolean;
-}
-
-/**
- * Клас для роботи з користувачами
- */
-export class UserService {
-  constructor(private userRepository: any) {}
+  constructor(
+    public id: string,
+    public name: string,
+    public email: string
+  ) { }
 
   /**
-   * Створити нового користувача
+   * Встановити підписку користувача
    */
-  async createUser(userData: CreateUserData): Promise<User> {
-    const now = new Date();
-    const user: Omit<User, 'id'> = {
-      ...userData,
-      createdAt: now,
-      updatedAt: now,
-      isActive: true
-    };
-
-    return await this.userRepository.create(user);
+  setSubscription(subscription: UserSubscription): void {
+    this.userSubscription = subscription;
   }
 
   /**
-   * Отримати користувача за ID
+   * Отримати підписку користувача
    */
-  async getUserById(id: string): Promise<User | null> {
-    return await this.userRepository.findById(id);
+  getSubscription(): UserSubscription | undefined {
+    return this.userSubscription;
   }
 
   /**
-   * Отримати користувача за email
+   * Перевірити чи має користувач активну підписку
    */
-  async getUserByEmail(email: string): Promise<User | null> {
-    const users = await this.userRepository.findBy({ email });
-    return users.length > 0 ? users[0] : null;
+  hasActiveSubscription(): boolean {
+    return this.userSubscription?.isActive() ?? false;
   }
 
   /**
-   * Отримати всіх користувачів
+   * Отримати інформацію про підписку
    */
-  async getAllUsers(): Promise<User[]> {
-    return await this.userRepository.findAll();
-  }
+  getSubscriptionInfo(): string {
+    if (!this.userSubscription) {
+      return 'Немає підписки';
+    }
 
-  /**
-   * Оновити користувача
-   */
-  async updateUser(id: string, updateData: UpdateUserData): Promise<User | null> {
-    const updateDataWithTimestamp = {
-      ...updateData,
-      updatedAt: new Date()
-    };
-    return await this.userRepository.update(id, updateDataWithTimestamp);
-  }
+    if (!this.userSubscription.isActive()) {
+      return 'Підписка неактивна';
+    }
 
-  /**
-   * Видалити користувача
-   */
-  async deleteUser(id: string): Promise<boolean> {
-    return await this.userRepository.delete(id);
-  }
-
-  /**
-   * Деактивувати користувача
-   */
-  async deactivateUser(id: string): Promise<User | null> {
-    return await this.updateUser(id, { isActive: false });
-  }
-
-  /**
-   * Активувати користувача
-   */
-  async activateUser(id: string): Promise<User | null> {
-    return await this.updateUser(id, { isActive: true });
+    const daysLeft = this.userSubscription.getDaysLeft();
+    return `Активна підписка, залишилось днів: ${daysLeft}`;
   }
 }
