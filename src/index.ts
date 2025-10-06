@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { DatabaseFactory } from './database/DatabaseFactory';
+import { databaseFactory } from './database/DatabaseFactory';
 import { UserService } from './services/UserService';
 import { SubscriptionPlanService } from './services/SubscriptionPlanService';
 import { PaymentSimulationService } from './services/PaymentSimulationService';
@@ -31,10 +31,10 @@ class Server {
     console.log('Ініціалізація бази даних...');
 
     // Створення репозиторіїв через фабрику
-    const userRepository = DatabaseFactory.createJSONService<UserData>('users');
-    const subscriptionRepository = DatabaseFactory.createJSONService<UserSubscriptionData>('user_subscriptions');
-    const planRepository = DatabaseFactory.createJSONService<SubscriptionPlanData>('subscription_plans');
-    const transactionRepository = DatabaseFactory.createJSONService<TransactionData>('transactions');
+    const userRepository = databaseFactory.createService<UserData>('users');
+    const subscriptionRepository = databaseFactory.createService<UserSubscriptionData>('user_subscriptions');
+    const planRepository = databaseFactory.createService<SubscriptionPlanData>('subscription_plans');
+    const transactionRepository = databaseFactory.createService<TransactionData>('transactions');
 
     // Створення сервісів
     const paymentSimulationService = new PaymentSimulationService(
