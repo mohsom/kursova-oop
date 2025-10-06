@@ -35,14 +35,14 @@ class Server {
     const subscriptionRepository = new JsonDatabase('subscriptions');
     const planRepository = new JsonDatabase('subscription_plans');
     const transactionRepository = new JsonDatabase('transactions');
-    
+
     // Створення сервісів
     const userService = new UserService(userRepository);
     const planService = new SubscriptionPlanService(planRepository);
     const subscriptionService = new SubscriptionService(subscriptionRepository, planRepository);
     const transactionService = new TransactionService(transactionRepository);
-    const webhookHandler = new WebhookHandler(subscriptionService);
-    
+    const webhookHandler = new WebhookHandler(subscriptionService, transactionService);
+
     // Збереження сервісів в app locals для використання в роутах
     this.app.locals.userService = userService;
     this.app.locals.planService = planService;
@@ -76,7 +76,7 @@ class Server {
    */
   private initializeRoutes(): void {
     const { userService, planService, subscriptionService, transactionService, webhookHandler } = this.app.locals;
-    
+
     // API роути
     this.app.use('/api', createRoutes(userService, subscriptionService, planService, transactionService, webhookHandler));
 

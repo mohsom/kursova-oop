@@ -69,7 +69,7 @@ export interface UpdateTransactionData {
  * Клас для роботи з транзакціями
  */
 export class TransactionService {
-  constructor(private transactionRepository: any) {}
+  constructor(private transactionRepository: any) { }
 
   /**
    * Створити нову транзакцію
@@ -152,7 +152,7 @@ export class TransactionService {
    * Позначити транзакцію як завершену
    */
   async completeTransaction(id: string): Promise<Transaction | null> {
-    return await this.updateTransaction(id, { 
+    return await this.updateTransaction(id, {
       status: TransactionStatus.COMPLETED,
       processedAt: new Date()
     });
@@ -162,7 +162,7 @@ export class TransactionService {
    * Позначити транзакцію як невдалу
    */
   async failTransaction(id: string): Promise<Transaction | null> {
-    return await this.updateTransaction(id, { 
+    return await this.updateTransaction(id, {
       status: TransactionStatus.FAILED,
       processedAt: new Date()
     });
@@ -179,19 +179,19 @@ export class TransactionService {
     averageAmount: number;
   }> {
     let transactions = await this.transactionRepository.findAll();
-    
+
     if (userId) {
-      transactions = transactions.filter(t => t.userId === userId);
+      transactions = transactions.filter((t: Transaction) => t.userId === userId);
     }
-    
+
     if (planId) {
-      transactions = transactions.filter(t => t.planId === planId);
+      transactions = transactions.filter((t: Transaction) => t.planId === planId);
     }
 
     const totalTransactions = transactions.length;
-    const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
-    const successfulTransactions = transactions.filter(t => t.status === TransactionStatus.COMPLETED).length;
-    const failedTransactions = transactions.filter(t => t.status === TransactionStatus.FAILED).length;
+    const totalAmount = transactions.reduce((sum: number, t: Transaction) => sum + t.amount, 0);
+    const successfulTransactions = transactions.filter((t: Transaction) => t.status === TransactionStatus.COMPLETED).length;
+    const failedTransactions = transactions.filter((t: Transaction) => t.status === TransactionStatus.FAILED).length;
     const averageAmount = totalTransactions > 0 ? totalAmount / totalTransactions : 0;
 
     return {
@@ -208,7 +208,7 @@ export class TransactionService {
    */
   async getTransactionsByPeriod(startDate: Date, endDate: Date): Promise<Transaction[]> {
     const allTransactions = await this.transactionRepository.findAll();
-    return allTransactions.filter(transaction => 
+    return allTransactions.filter((transaction: Transaction) =>
       transaction.createdAt >= startDate && transaction.createdAt <= endDate
     );
   }
