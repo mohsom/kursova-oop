@@ -170,9 +170,9 @@ const PaymentSimulation: React.FC = () => {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("uk-UA", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "UAH",
+      currency: "USD",
     }).format(price);
   };
 

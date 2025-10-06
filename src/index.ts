@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
 import { JsonDatabase } from './database/JsonDatabase';
 import { UserService } from './models/User';
 import { SubscriptionService } from './models/Subscription';
@@ -9,6 +10,9 @@ import { TransactionService } from './models/Transaction';
 import { WebhookHandler } from './webhooks/WebhookHandler';
 import { createRoutes } from './api/routes';
 
+// Завантажуємо environment змінні
+dotenv.config();
+
 /**
  * Головний файл сервера
  */
@@ -16,9 +20,9 @@ class Server {
   private app: express.Application;
   private port: number;
 
-  constructor(port: number = 3000) {
+  constructor(port?: number) {
     this.app = express();
-    this.port = port;
+    this.port = port || parseInt(process.env.PORT || '3001', 10);
     this.initializeDatabase();
     this.initializeMiddleware();
     this.initializeRoutes();
@@ -58,7 +62,11 @@ class Server {
    */
   private initializeMiddleware(): void {
     // CORS
-    this.app.use(cors());
+    const corsOptions = {
+      origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+      credentials: true
+    };
+    this.app.use(cors(corsOptions));
 
     // Body parser
     this.app.use(bodyParser.json());
@@ -143,5 +151,5 @@ class Server {
 }
 
 // Запуск сервера
-const server = new Server(3000);
+const server = new Server();
 server.start();

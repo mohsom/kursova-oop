@@ -1,21 +1,40 @@
 import React, { useState } from "react";
-import { Users, CreditCard, BarChart3, Shield, Plus } from "lucide-react";
+import {
+  Users,
+  CreditCard,
+  BarChart3,
+  Shield,
+  Plus,
+  ShoppingCart,
+  Package,
+} from "lucide-react";
 import UserManagement from "./components/UserManagement";
+import PlanManagement from "./components/PlanManagement";
 import SubscriptionManagement from "./components/SubscriptionManagement";
 import PaymentSimulation from "./components/PaymentSimulation";
+import PaddlePayment from "./components/PaddlePayment";
 import LicenseCheck from "./components/LicenseCheck";
 import TransactionStats from "./components/TransactionStats";
 import "./App.css";
 
-type TabType = "users" | "subscriptions" | "payment" | "license" | "stats";
+type TabType =
+  | "users"
+  | "plans"
+  | "subscriptions"
+  | "payment"
+  | "paddle"
+  | "license"
+  | "stats";
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("users");
 
   const tabs = [
     { id: "users" as TabType, label: "Користувачі", icon: Users },
+    { id: "plans" as TabType, label: "Плани", icon: Package },
     { id: "subscriptions" as TabType, label: "Підписки", icon: CreditCard },
-    { id: "payment" as TabType, label: "Оплата", icon: Plus },
+    { id: "payment" as TabType, label: "Оплата (стара)", icon: Plus },
+    { id: "paddle" as TabType, label: "Paddle Оплата", icon: ShoppingCart },
     { id: "license" as TabType, label: "Ліцензії", icon: Shield },
     { id: "stats" as TabType, label: "Статистика", icon: BarChart3 },
   ];
@@ -24,10 +43,14 @@ const App: React.FC = () => {
     switch (activeTab) {
       case "users":
         return <UserManagement />;
+      case "plans":
+        return <PlanManagement />;
       case "subscriptions":
         return <SubscriptionManagement />;
       case "payment":
         return <PaymentSimulation />;
+      case "paddle":
+        return <PaddlePayment />;
       case "license":
         return <LicenseCheck />;
       case "stats":

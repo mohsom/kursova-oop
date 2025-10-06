@@ -16,7 +16,7 @@ export interface SubscriptionPlan {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number; // в USD
   billingInterval: 'monthly' | 'yearly';
   features: string[];
   isActive: boolean;

@@ -1,8 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { BarChart3, TrendingUp, DollarSign, CreditCard } from 'lucide-react';
-import { transactionApi, subscriptionApi, userApi, planApi } from '../services/api';
-import { TransactionStats as TransactionStatsType, Transaction, Subscription, User, SubscriptionPlan } from '../types';
+import React, { useState, useEffect } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { BarChart3, TrendingUp, DollarSign, CreditCard } from "lucide-react";
+import {
+  transactionApi,
+  subscriptionApi,
+  userApi,
+  planApi,
+} from "../services/api";
+import {
+  TransactionStats as TransactionStatsType,
+  Transaction,
+  Subscription,
+  User,
+  SubscriptionPlan,
+} from "../types";
 
 const TransactionStats: React.FC = () => {
   const [stats, setStats] = useState<TransactionStatsType | null>(null);
@@ -12,8 +37,8 @@ const TransactionStats: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<string>('');
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("");
 
   useEffect(() => {
     loadData();
@@ -29,21 +54,27 @@ const TransactionStats: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [statsData, transactionsData, subscriptionsData, usersData, plansData] = await Promise.all([
+      const [
+        statsData,
+        transactionsData,
+        subscriptionsData,
+        usersData,
+        plansData,
+      ] = await Promise.all([
         transactionApi.getTransactionStats(),
         transactionApi.getAllTransactions(),
         subscriptionApi.getAllSubscriptions(),
         userApi.getAllUsers(),
         planApi.getAllPlans(),
       ]);
-      
+
       setStats(statsData);
       setTransactions(transactionsData);
       setSubscriptions(subscriptionsData);
       setUsers(usersData);
       setPlans(plansData);
     } catch (err) {
-      setError('Помилка завантаження статистики');
+      setError("Помилка завантаження статистики");
       console.error(err);
     } finally {
       setLoading(false);
@@ -52,61 +83,66 @@ const TransactionStats: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const statsData = await transactionApi.getTransactionStats(selectedUserId || undefined, selectedPlanId || undefined);
+      const statsData = await transactionApi.getTransactionStats(
+        selectedUserId || undefined,
+        selectedPlanId || undefined
+      );
       setStats(statsData);
     } catch (err) {
-      setError('Помилка завантаження статистики');
+      setError("Помилка завантаження статистики");
       console.error(err);
     }
   };
 
   const getUserName = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    return user ? user.name : 'Невідомий користувач';
+    const user = users.find((u) => u.id === userId);
+    return user ? user.name : "Невідомий користувач";
   };
 
   const getPlanName = (planId: string) => {
-    const plan = plans.find(p => p.id === planId);
-    return plan ? plan.name : 'Невідомий план';
+    const plan = plans.find((p) => p.id === planId);
+    return plan ? plan.name : "Невідомий план";
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('uk-UA', {
-      style: 'currency',
-      currency: 'UAH',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(price);
   };
 
   const getMonthlyRevenueData = () => {
     if (!stats?.monthlyRevenue) return [];
-    
-    return stats.monthlyRevenue.map(item => ({
+
+    return stats.monthlyRevenue.map((item) => ({
       month: item.month,
       revenue: item.revenue,
-      formattedRevenue: formatPrice(item.revenue)
+      formattedRevenue: formatPrice(item.revenue),
     }));
   };
 
   const getPlanStatsData = () => {
     if (!stats?.planStats) return [];
-    
-    return stats.planStats.map(item => ({
+
+    return stats.planStats.map((item) => ({
       name: getPlanName(item.planId),
       subscriptions: item.subscriptions,
       revenue: item.revenue,
-      formattedRevenue: formatPrice(item.revenue)
+      formattedRevenue: formatPrice(item.revenue),
     }));
   };
 
   const getTransactionStatusData = () => {
-    const completed = transactions.filter(t => t.status === 'completed').length;
-    const failed = transactions.filter(t => t.status === 'failed').length;
-    const pending = transactions.filter(t => t.status === 'pending').length;
+    const completed = transactions.filter(
+      (t) => t.status === "completed"
+    ).length;
+    const failed = transactions.filter((t) => t.status === "failed").length;
+    const pending = transactions.filter((t) => t.status === "pending").length;
 
     return [
-      { name: 'Завершені', value: completed, color: '#28a745' },
-      { name: 'Невдалі', value: failed, color: '#dc3545' },
-      { name: 'Очікують', value: pending, color: '#ffc107' },
+      { name: "Завершені", value: completed, color: "#28a745" },
+      { name: "Невдалі", value: failed, color: "#dc3545" },
+      { name: "Очікують", value: pending, color: "#ffc107" },
     ];
   };
 
@@ -114,30 +150,37 @@ const TransactionStats: React.FC = () => {
     const last30Days = Array.from({ length: 30 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      return date.toISOString().split('T')[0];
+      return date.toISOString().split("T")[0];
     }).reverse();
 
-    return last30Days.map(date => {
-      const dayTransactions = transactions.filter(t => 
+    return last30Days.map((date) => {
+      const dayTransactions = transactions.filter((t) =>
         t.createdAt.startsWith(date)
       );
-      
-      const completed = dayTransactions.filter(t => t.status === 'completed').length;
-      const failed = dayTransactions.filter(t => t.status === 'failed').length;
+
+      const completed = dayTransactions.filter(
+        (t) => t.status === "completed"
+      ).length;
+      const failed = dayTransactions.filter(
+        (t) => t.status === "failed"
+      ).length;
       const revenue = dayTransactions
-        .filter(t => t.status === 'completed')
+        .filter((t) => t.status === "completed")
         .reduce((sum, t) => sum + t.amount, 0);
 
       return {
-        date: new Date(date).toLocaleDateString('uk-UA', { month: 'short', day: 'numeric' }),
+        date: new Date(date).toLocaleDateString("uk-UA", {
+          month: "short",
+          day: "numeric",
+        }),
         completed,
         failed,
-        revenue
+        revenue,
       };
     });
   };
 
-  const COLORS = ['#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6f42c1'];
+  const COLORS = ["#28a745", "#dc3545", "#ffc107", "#17a2b8", "#6f42c1"];
 
   if (loading) {
     return (
@@ -159,34 +202,37 @@ const TransactionStats: React.FC = () => {
     <div>
       <div className="grid grid-3">
         <div className="card">
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <DollarSign size={24} />
             Загальний дохід
           </h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#28a745' }}>
+          <p style={{ fontSize: "2rem", fontWeight: "bold", color: "#28a745" }}>
             {formatPrice(stats.totalRevenue)}
           </p>
         </div>
 
         <div className="card">
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <CreditCard size={24} />
             Всього транзакцій
           </h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#17a2b8' }}>
+          <p style={{ fontSize: "2rem", fontWeight: "bold", color: "#17a2b8" }}>
             {stats.totalTransactions}
           </p>
         </div>
 
         <div className="card">
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <TrendingUp size={24} />
             Успішність
           </h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#28a745' }}>
-            {stats.totalTransactions > 0 
-              ? Math.round((stats.successfulTransactions / stats.totalTransactions) * 100)
-              : 0}%
+          <p style={{ fontSize: "2rem", fontWeight: "bold", color: "#28a745" }}>
+            {stats.totalTransactions > 0
+              ? Math.round(
+                  (stats.successfulTransactions / stats.totalTransactions) * 100
+                )
+              : 0}
+            %
           </p>
         </div>
       </div>
@@ -201,7 +247,7 @@ const TransactionStats: React.FC = () => {
 
         {error && <div className="error">{error}</div>}
 
-        <div className="grid grid-2" style={{ marginBottom: '2rem' }}>
+        <div className="grid grid-2" style={{ marginBottom: "2rem" }}>
           <div className="form-group">
             <label className="form-label">Фільтр по користувачу</label>
             <select
@@ -210,7 +256,7 @@ const TransactionStats: React.FC = () => {
               onChange={(e) => setSelectedUserId(e.target.value)}
             >
               <option value="">Всі користувачі</option>
-              {users.map(user => (
+              {users.map((user) => (
                 <option key={user.id} value={user.id}>
                   {user.name}
                 </option>
@@ -226,7 +272,7 @@ const TransactionStats: React.FC = () => {
               onChange={(e) => setSelectedPlanId(e.target.value)}
             >
               <option value="">Всі плани</option>
-              {plans.map(plan => (
+              {plans.map((plan) => (
                 <option key={plan.id} value={plan.id}>
                   {plan.name}
                 </option>
@@ -243,8 +289,8 @@ const TransactionStats: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip 
-                  formatter={(value: number) => [formatPrice(value), 'Дохід']}
+                <Tooltip
+                  formatter={(value: number) => [formatPrice(value), "Дохід"]}
                 />
                 <Legend />
                 <Bar dataKey="revenue" fill="#28a745" />
@@ -287,8 +333,18 @@ const TransactionStats: React.FC = () => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="completed" stroke="#28a745" name="Успішні" />
-                <Line type="monotone" dataKey="failed" stroke="#dc3545" name="Невдалі" />
+                <Line
+                  type="monotone"
+                  dataKey="completed"
+                  stroke="#28a745"
+                  name="Успішні"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="failed"
+                  stroke="#dc3545"
+                  name="Невдалі"
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -298,10 +354,15 @@ const TransactionStats: React.FC = () => {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={getPlanStatsData()}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                />
                 <YAxis />
-                <Tooltip 
-                  formatter={(value: number) => [formatPrice(value), 'Дохід']}
+                <Tooltip
+                  formatter={(value: number) => [formatPrice(value), "Дохід"]}
                 />
                 <Legend />
                 <Bar dataKey="revenue" fill="#17a2b8" />
@@ -325,14 +386,15 @@ const TransactionStats: React.FC = () => {
               <tbody>
                 {getPlanStatsData().map((plan, index) => (
                   <tr key={index}>
-                    <td style={{ fontWeight: 'bold' }}>{plan.name}</td>
+                    <td style={{ fontWeight: "bold" }}>{plan.name}</td>
                     <td>{plan.subscriptions}</td>
-                    <td style={{ fontWeight: 'bold' }}>{plan.formattedRevenue}</td>
+                    <td style={{ fontWeight: "bold" }}>
+                      {plan.formattedRevenue}
+                    </td>
                     <td>
-                      {plan.subscriptions > 0 
+                      {plan.subscriptions > 0
                         ? formatPrice(plan.revenue / plan.subscriptions)
-                        : formatPrice(0)
-                      }
+                        : formatPrice(0)}
                     </td>
                   </tr>
                 ))}
