@@ -1,7 +1,5 @@
 import React from "react";
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Drawer,
   List,
@@ -9,8 +7,7 @@ import {
   ListItemIcon,
   ListItemText,
   Box,
-  useTheme,
-  useMediaQuery,
+  Toolbar,
 } from "@mui/material";
 import { People, CardMembership, Payment, BarChart } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -24,8 +21,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  // Спрощений layout без responsive
 
   const menuItems = [
     { text: "Користувачі", icon: <People />, path: "/users" },
@@ -54,10 +50,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             selected={location.pathname === item.path}
             sx={{
               "&.Mui-selected": {
-                backgroundColor: theme.palette.primary.main,
+                backgroundColor: "#1976d2",
                 color: "white",
                 "&:hover": {
-                  backgroundColor: theme.palette.primary.dark,
+                  backgroundColor: "#1565c0",
                 },
                 "& .MuiListItemIcon-root": {
                   color: "white",
@@ -74,45 +70,49 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
-        }}
-      >
-        <Toolbar>
-          <Typography variant="h6" noWrap component="div">
-            Система управління підписками
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      {/* Фіксована бокова панель */}
       <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
+        variant="permanent"
         sx={{
           width: drawerWidth,
           flexShrink: 0,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
+            position: "relative",
           },
         }}
-        open={true}
       >
         {drawer}
       </Drawer>
 
+      {/* Основний контент */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          mt: 8,
+          backgroundColor: "#f5f5f5",
+          minHeight: "100vh",
         }}
       >
+        {/* Заголовок */}
+        <Box
+          sx={{
+            backgroundColor: "primary.main",
+            color: "white",
+            p: 2,
+            mb: 3,
+            borderRadius: 1,
+          }}
+        >
+          <Typography variant="h5" component="h1">
+            Система управління підписками
+          </Typography>
+        </Box>
+
+        {/* Контент сторінки */}
         {children}
       </Box>
     </Box>

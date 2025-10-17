@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Box } from "@mui/material";
 import Layout from "./components/Layout";
 import UsersPage from "./pages/UsersPage";
 import PlansPage from "./pages/PlansPage";
@@ -24,17 +23,15 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ display: "flex", minHeight: "100vh" }}>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<UsersPage />} />
-              <Route path="/users" element={<UsersPage />} />
-              <Route path="/plans" element={<PlansPage />} />
-              <Route path="/payment" element={<PaymentSimulationPage />} />
-              <Route path="/statistics" element={<StatisticsPage />} />
-            </Routes>
-          </Layout>
-        </Box>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<UsersPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/plans" element={<PlansPage />} />
+            <Route path="/payment" element={<PaymentSimulationPage />} />
+            <Route path="/statistics" element={<StatisticsPage />} />
+          </Routes>
+        </Layout>
       </Router>
     </ThemeProvider>
   );

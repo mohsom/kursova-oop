@@ -172,11 +172,11 @@ const PlansPage: React.FC = () => {
 
       <Grid container spacing={3}>
         {plans.map((plan) => (
-          <Grid item xs={12} sm={6} md={4} key={plan.id}>
+          <Grid item xs={12} md={6} lg={4} key={plan.id}>
             <Card
-              sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+              sx={{ height: 300, display: "flex", flexDirection: "column" }}
             >
-              <CardContent sx={{ flexGrow: 1 }}>
+              <CardContent sx={{ flexGrow: 1, pb: 2 }}>
                 <Box
                   display="flex"
                   justifyContent="space-between"
@@ -217,6 +217,7 @@ const PlansPage: React.FC = () => {
                   size="small"
                   startIcon={<Edit />}
                   onClick={() => handleOpenDialog(plan)}
+                  sx={{ mr: 1 }}
                 >
                   Редагувати
                 </Button>

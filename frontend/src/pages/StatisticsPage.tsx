@@ -96,22 +96,39 @@ const StatisticsPage: React.FC = () => {
     );
   }
 
-  // Prepare data for charts
-  const lineChartData = stats.transactionsByMonth.map((item) => ({
-    month: formatDate(item.month),
-    count: item.count,
-    amount: item.amount,
-  }));
+  // Перевірка на наявність даних
+  if (!stats.transactionsByMonth || stats.transactionsByMonth.length === 0) {
+    return (
+      <Box>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Статистика транзакцій
+        </Typography>
+        <Alert severity="info">
+          Немає даних для відображення статистики. Створіть кілька транзакцій
+          для аналізу.
+        </Alert>
+      </Box>
+    );
+  }
 
-  const barChartData = stats.transactionsByMonth.map((item) => ({
-    month: formatDate(item.month),
-    transactions: item.count,
-    revenue: item.amount,
-  }));
+  // Prepare data for charts
+  const lineChartData =
+    stats.transactionsByMonth?.map((item) => ({
+      month: formatDate(item.month),
+      count: item.count || 0,
+      amount: item.amount || 0,
+    })) || [];
+
+  const barChartData =
+    stats.transactionsByMonth?.map((item) => ({
+      month: formatDate(item.month),
+      transactions: item.count || 0,
+      revenue: item.amount || 0,
+    })) || [];
 
   const pieChartData = [
-    { name: "Активні транзакції", value: stats.totalTransactions },
-    { name: "Загальна сума", value: stats.totalAmount },
+    { name: "Активні транзакції", value: stats.totalTransactions || 0 },
+    { name: "Загальна сума", value: stats.totalAmount || 0 },
   ];
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
