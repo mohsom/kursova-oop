@@ -36,11 +36,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const drawer = (
     <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          SaaS Management
-        </Typography>
-      </Toolbar>
       <List>
         {menuItems.map((item) => (
           <ListItem
@@ -97,21 +92,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           minHeight: "100vh",
         }}
       >
-        {/* Заголовок */}
-        <Box
-          sx={{
-            backgroundColor: "primary.main",
-            color: "white",
-            p: 2,
-            mb: 3,
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="h5" component="h1">
-            Система управління підписками
-          </Typography>
-        </Box>
-
         {/* Контент сторінки */}
         {children}
       </Box>
