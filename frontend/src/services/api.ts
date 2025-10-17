@@ -1,17 +1,7 @@
 import axios from 'axios';
-import {
-    User,
-    CreateUserData,
-    Subscription,
-    CreateSubscriptionData,
-    SubscriptionPlan,
-    Transaction,
-    CreateTransactionData,
-    TransactionStats,
-    ApiResponse
-} from '../types';
+import type { User, SubscriptionPlan, Transaction, PaymentSimulation, ApiResponse, TransactionStats } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = '/api';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -20,139 +10,99 @@ const api = axios.create({
     },
 });
 
-// User API
-export const userApi = {
-    getAllUsers: async (): Promise<User[]> => {
+// Users API
+export const usersApi = {
+    getAll: async (): Promise<User[]> => {
         const response = await api.get<ApiResponse<User[]>>('/users');
         return response.data.data || [];
     },
 
-    getUserById: async (id: string): Promise<User> => {
+    getById: async (id: string): Promise<User> => {
         const response = await api.get<ApiResponse<User>>(`/users/${id}`);
-        return response.data.data!;
+        if (!response.data.data) {
+            throw new Error('User not found');
+        }
+        return response.data.data;
     },
 
-    createUser: async (userData: CreateUserData): Promise<User> => {
-        const response = await api.post<ApiResponse<User>>('/users', userData);
-        return response.data.data!;
+    create: async (user: { name: string; email: string }): Promise<User> => {
+        const response = await api.post<ApiResponse<User>>('/users', user);
+        if (!response.data.data) {
+            throw new Error('Failed to create user');
+        }
+        return response.data.data;
     },
 
-    updateUser: async (id: string, userData: Partial<CreateUserData>): Promise<User> => {
-        const response = await api.put<ApiResponse<User>>(`/users/${id}`, userData);
-        return response.data.data!;
+    update: async (id: string, user: { name: string; email: string }): Promise<User> => {
+        const response = await api.put<ApiResponse<User>>(`/users/${id}`, user);
+        if (!response.data.data) {
+            throw new Error('Failed to update user');
+        }
+        return response.data.data;
     },
 
-    deleteUser: async (id: string): Promise<void> => {
+    delete: async (id: string): Promise<void> => {
         await api.delete(`/users/${id}`);
     },
 };
 
-// Subscription Plan API
-export const planApi = {
-    getAllPlans: async (): Promise<SubscriptionPlan[]> => {
+// Subscription Plans API
+export const plansApi = {
+    getAll: async (): Promise<SubscriptionPlan[]> => {
         const response = await api.get<ApiResponse<SubscriptionPlan[]>>('/plans');
         return response.data.data || [];
     },
 
-    getPlanById: async (id: string): Promise<SubscriptionPlan> => {
+    getById: async (id: string): Promise<SubscriptionPlan> => {
         const response = await api.get<ApiResponse<SubscriptionPlan>>(`/plans/${id}`);
-        return response.data.data!;
+        if (!response.data.data) {
+            throw new Error('Plan not found');
+        }
+        return response.data.data;
     },
 
-    createPlan: async (planData: Omit<SubscriptionPlan, 'id'>): Promise<SubscriptionPlan> => {
-        const response = await api.post<ApiResponse<SubscriptionPlan>>('/plans', planData);
-        return response.data.data!;
+    create: async (plan: { name: string; price: number; period: 'monthly' | 'yearly' }): Promise<SubscriptionPlan> => {
+        const response = await api.post<ApiResponse<SubscriptionPlan>>('/plans', plan);
+        if (!response.data.data) {
+            throw new Error('Failed to create plan');
+        }
+        return response.data.data;
     },
 
-    updatePlan: async (id: string, planData: Partial<Omit<SubscriptionPlan, 'id'>>): Promise<SubscriptionPlan> => {
-        const response = await api.put<ApiResponse<SubscriptionPlan>>(`/plans/${id}`, planData);
-        return response.data.data!;
+    update: async (id: string, plan: { name: string; price: number; period: 'monthly' | 'yearly' }): Promise<SubscriptionPlan> => {
+        const response = await api.put<ApiResponse<SubscriptionPlan>>(`/plans/${id}`, plan);
+        if (!response.data.data) {
+            throw new Error('Failed to update plan');
+        }
+        return response.data.data;
     },
 
-    deletePlan: async (id: string): Promise<void> => {
+    delete: async (id: string): Promise<void> => {
         await api.delete(`/plans/${id}`);
     },
 };
 
-// Subscription API
-export const subscriptionApi = {
-    getAllSubscriptions: async (): Promise<Subscription[]> => {
-        const response = await api.get<ApiResponse<Subscription[]>>('/subscriptions');
+// Payment API
+export const paymentApi = {
+    simulate: async (payment: PaymentSimulation): Promise<unknown> => {
+        const response = await api.post<ApiResponse<unknown>>('/payment/simulate', payment);
+        if (!response.data.data) {
+            throw new Error('Payment simulation failed');
+        }
+        return response.data.data;
+    },
+
+    getStats: async (): Promise<TransactionStats> => {
+        const response = await api.get<ApiResponse<TransactionStats>>('/payment/stats');
+        if (!response.data.data) {
+            throw new Error('Failed to get stats');
+        }
+        return response.data.data;
+    },
+
+    getUserTransactions: async (email: string): Promise<Transaction[]> => {
+        const response = await api.get<ApiResponse<Transaction[]>>(`/payment/user/${email}/transactions`);
         return response.data.data || [];
-    },
-
-    getSubscriptionById: async (id: string): Promise<Subscription> => {
-        const response = await api.get<ApiResponse<Subscription>>(`/subscriptions/${id}`);
-        return response.data.data!;
-    },
-
-    getUserSubscriptions: async (userId: string): Promise<Subscription[]> => {
-        const response = await api.get<ApiResponse<Subscription[]>>(`/users/${userId}/subscriptions`);
-        return response.data.data || [];
-    },
-
-    getUserSubscriptionsByEmail: async (email: string): Promise<Subscription[]> => {
-        const response = await api.get<ApiResponse<Subscription[]>>(`/payment/user/${email}/subscriptions`);
-        return response.data.data || [];
-    },
-
-    createSubscription: async (subscriptionData: CreateSubscriptionData): Promise<Subscription> => {
-        const response = await api.post<ApiResponse<Subscription>>('/subscriptions', subscriptionData);
-        return response.data.data!;
-    },
-
-    cancelSubscription: async (id: string): Promise<Subscription> => {
-        const response = await api.post<ApiResponse<Subscription>>(`/subscriptions/${id}/cancel`);
-        return response.data.data!;
-    },
-
-    activateSubscription: async (id: string): Promise<Subscription> => {
-        const response = await api.put<ApiResponse<Subscription>>(`/subscriptions/${id}`, {
-            status: 'active'
-        });
-        return response.data.data!;
-    },
-};
-
-// Transaction API
-export const transactionApi = {
-    getAllTransactions: async (): Promise<Transaction[]> => {
-        const response = await api.get<ApiResponse<Transaction[]>>('/transactions');
-        return response.data.data || [];
-    },
-
-    getUserTransactions: async (userId: string): Promise<Transaction[]> => {
-        const response = await api.get<ApiResponse<Transaction[]>>(`/users/${userId}/transactions`);
-        return response.data.data || [];
-    },
-
-    getSubscriptionTransactions: async (subscriptionId: string): Promise<Transaction[]> => {
-        const response = await api.get<ApiResponse<Transaction[]>>(`/subscriptions/${subscriptionId}/transactions`);
-        return response.data.data || [];
-    },
-
-    createTransaction: async (transactionData: CreateTransactionData): Promise<Transaction> => {
-        const response = await api.post<ApiResponse<Transaction>>('/transactions', transactionData);
-        return response.data.data!;
-    },
-
-    completeTransaction: async (id: string): Promise<Transaction> => {
-        const response = await api.post<ApiResponse<Transaction>>(`/transactions/${id}/complete`);
-        return response.data.data!;
-    },
-
-    failTransaction: async (id: string): Promise<Transaction> => {
-        const response = await api.post<ApiResponse<Transaction>>(`/transactions/${id}/fail`);
-        return response.data.data!;
-    },
-
-    getTransactionStats: async (userId?: string, planId?: string): Promise<TransactionStats> => {
-        const params = new URLSearchParams();
-        if (userId) params.append('userId', userId);
-        if (planId) params.append('planId', planId);
-
-        const response = await api.get<ApiResponse<TransactionStats>>(`/transactions/stats?${params.toString()}`);
-        return response.data.data!;
     },
 };
 

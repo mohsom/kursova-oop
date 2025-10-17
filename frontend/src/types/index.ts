@@ -1,79 +1,49 @@
 export interface User {
-  id: string;
-  email: string;
-  name: string;
-  subscription?: Subscription | null;
-}
-
-export interface CreateUserData {
-  email: string;
-  name: string;
+    id: string;
+    name: string;
+    email: string;
+    subscription?: {
+        planName: string;
+        status: string;
+        endDate: string;
+    };
 }
 
 export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  price: number; // в грн
-  period: 'monthly' | 'yearly';
-}
-
-export interface Subscription {
-  id: string;
-  userId: string;
-  planId: string;
-  status: 'active' | 'cancelled' | 'expired' | 'pending' | 'payment_failed';
-  startDate: string;
-  endDate: string;
-  subscriptionEndDate: string;
-  price: number;
-  createdAt: string;
-  updatedAt: string;
-  paymentMethod?: string;
-  autoRenew: boolean;
-  billingInterval: 'monthly' | 'yearly';
-  plan?: SubscriptionPlan;
-}
-
-export interface CreateSubscriptionData {
-  userId: string;
-  planId: string;
-  paymentMethod?: string;
-  autoRenew?: boolean;
+    id: string;
+    name: string;
+    price: number;
+    period: 'monthly' | 'yearly';
 }
 
 export interface Transaction {
-  id: string;
-  subscriptionId: string;
-  userId: string;
-  planId: string;
-  amount: number;
-  status: 'pending' | 'completed' | 'failed';
-  type: 'payment' | 'refund';
-  createdAt: string;
-  updatedAt: string;
-  completedAt?: string;
-  paymentMethod?: string;
-  description?: string;
+    id: string;
+    amount: number;
+    email: string;
+    subscriptionPlanId: string;
+    date: string;
 }
 
-export interface CreateTransactionData {
-  subscriptionId: string;
-  userId: string;
-  planId: string;
-  amount: number;
-  paymentMethod?: string;
-  description?: string;
-}
-
-export interface TransactionStats {
-  totalTransactions: number;
-  totalAmount: number;
-  averageAmount: number;
+export interface PaymentSimulation {
+    userEmail: string;
+    subscriptionPlanId: string;
+    amount: number;
 }
 
 export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
+    success: boolean;
+    data?: T;
+    message?: string;
+    error?: string;
+}
+
+export interface TransactionStats {
+    totalTransactions: number;
+    totalAmount: number;
+    averageAmount: number;
+    transactionsByMonth: Array<{
+        month: string;
+        count: number;
+        amount: number;
+    }>;
 }

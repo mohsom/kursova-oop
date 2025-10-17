@@ -1,65 +1,43 @@
-import React, { useState } from "react";
-import { Users, CreditCard, BarChart3, Package } from "lucide-react";
-import UserManagement from "./components/UserManagement";
-import PlanManagement from "./components/PlanManagement";
-import PaymentSimulationNew from "./components/PaymentSimulationNew";
-import TransactionStatsNew from "./components/TransactionStatsNew";
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { Box } from "@mui/material";
+import Layout from "./components/Layout";
+import UsersPage from "./pages/UsersPage";
+import PlansPage from "./pages/PlansPage";
+import PaymentSimulationPage from "./pages/PaymentSimulationPage";
+import StatisticsPage from "./pages/StatisticsPage";
 
-type TabType = "users" | "plans" | "payment" | "stats";
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#1976d2",
+    },
+    secondary: {
+      main: "#dc004e",
+    },
+  },
+});
 
-const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("users");
-
-  const tabs = [
-    { id: "users" as TabType, label: "Користувачі", icon: Users },
-    { id: "plans" as TabType, label: "Плани", icon: Package },
-    { id: "payment" as TabType, label: "Симуляція оплати", icon: CreditCard },
-    { id: "stats" as TabType, label: "Статистика", icon: BarChart3 },
-  ];
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case "users":
-        return <UserManagement />;
-      case "plans":
-        return <PlanManagement />;
-      case "payment":
-        return <PaymentSimulationNew />;
-      case "stats":
-        return <TransactionStatsNew />;
-      default:
-        return <UserManagement />;
-    }
-  };
-
+function App() {
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>Система управління підписками SaaS</h1>
-        <p>Демонстрація роботи системи управління підписками</p>
-      </header>
-
-      <nav className="app-nav">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              className={`nav-button ${activeTab === tab.id ? "active" : ""}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <Icon size={20} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
-      <main className="app-main">{renderContent()}</main>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Box sx={{ display: "flex", minHeight: "100vh" }}>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<UsersPage />} />
+              <Route path="/users" element={<UsersPage />} />
+              <Route path="/plans" element={<PlansPage />} />
+              <Route path="/payment" element={<PaymentSimulationPage />} />
+              <Route path="/statistics" element={<StatisticsPage />} />
+            </Routes>
+          </Layout>
+        </Box>
+      </Router>
+    </ThemeProvider>
   );
-};
+}
 
 export default App;
