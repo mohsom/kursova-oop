@@ -23,5 +23,20 @@
         "id": "user5",
         "name": "Дмитро Шевченко",
         "email": "dmitro@example.com"
+    },
+    {
+        "id": "user6",
+        "name": "Олена Коваль",
+        "email": "olena@example.com"
+    },
+    {
+        "id": "user7",
+        "name": "Петро Іваненко",
+        "email": "petro@example.com"
+    },
+    {
+        "id": "user8",
+        "name": "Наталія Шевченко",
+        "email": "natalia@example.com"
     }
 ]

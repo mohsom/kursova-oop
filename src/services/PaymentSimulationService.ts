@@ -48,16 +48,8 @@ export class PaymentSimulationService {
         // Зберігаємо підписку в базі даних
         await this.subscriptionRepository.create({
             email: userSubscription.email,
-            planId: userSubscription.subscriptionPlanId,
-            status: 'active',
-            startDate: new Date().toISOString(),
-            endDate: userSubscription.subscriptionEndDate.toISOString(),
-            subscriptionEndDate: userSubscription.subscriptionEndDate.toISOString(),
-            price: plan.price,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            autoRenew: false,
-            billingInterval: plan.period
+            subscriptionPlanId: userSubscription.subscriptionPlanId,
+            subscriptionEndDate: userSubscription.subscriptionEndDate.toISOString()
         });
 
         // Створюємо транзакцію

@@ -117,7 +117,11 @@ const UsersPage: React.FC = () => {
       return <Chip label="Без підписки" color="default" size="small" />;
     }
 
-    const isActive = user.subscription.status === "active";
+    // Перевіряємо, чи підписка ще активна за датою закінчення
+    const endDate = new Date(user.subscription.subscriptionEndDate);
+    const currentDate = new Date();
+    const isActive = endDate > currentDate;
+
     return (
       <Chip
         label={isActive ? "Активна" : "Неактивна"}
@@ -181,7 +185,7 @@ const UsersPage: React.FC = () => {
               <TableRow key={user.id}>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.name}</TableCell>
-                <TableCell>{user.plan?.name || "Немає"}</TableCell>
+                <TableCell>{user.subscription?.planName || "Немає"}</TableCell>
                 <TableCell>{getStatusChip(user)}</TableCell>
                 <TableCell>
                   {user.subscription?.subscriptionEndDate

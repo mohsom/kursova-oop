@@ -68,7 +68,7 @@ export class UserService {
         const result = [];
         for (const userData of usersData) {
             const subscription = await this.userSubscriptionService.getUserSubscriptionsAsSubscription(userData.email);
-            const plan = await this.planService.getPlanById(subscription.subscriptionPlanId);
+            const plan = subscription ? await this.planService.getPlanById(subscription.subscriptionPlanId) : null;
 
             result.push({
                 id: userData.id,

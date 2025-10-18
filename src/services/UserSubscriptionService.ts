@@ -10,12 +10,17 @@ export class UserSubscriptionService {
         private subscriptionRepository: DatabaseService<UserSubscriptionData>,
     ) { }
 
-    async getUserSubscriptionsAsSubscription(email: string): Promise<UserSubscription> {
-        const [subData] = await this.subscriptionRepository.findBy({ email });
+    async getUserSubscriptionsAsSubscription(email: string): Promise<UserSubscription | null> {
+        const subscriptions = await this.subscriptionRepository.findBy({ email });
 
+        if (subscriptions.length === 0) {
+            return null;
+        }
+
+        const subData = subscriptions[0];
         return new UserSubscription(
             subData.email,
-            subData.planId,
+            subData.subscriptionPlanId,
             new Date(subData.subscriptionEndDate)
         );
     }
