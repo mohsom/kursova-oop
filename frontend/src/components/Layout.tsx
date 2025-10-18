@@ -1,13 +1,11 @@
 import React from "react";
 import {
-  Typography,
   Drawer,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Box,
-  Toolbar,
 } from "@mui/material";
 import { People, CardMembership, Payment, BarChart } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -21,7 +19,6 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  // Спрощений layout без responsive
 
   const menuItems = [
     { text: "Користувачі", icon: <People />, path: "/users" },
@@ -66,7 +63,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* Фіксована бокова панель */}
       <Drawer
         variant="permanent"
         sx={{
@@ -82,7 +78,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {drawer}
       </Drawer>
 
-      {/* Основний контент */}
       <Box
         component="main"
         sx={{
@@ -92,7 +87,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           minHeight: "100vh",
         }}
       >
-        {/* Контент сторінки */}
         {children}
       </Box>
     </Box>

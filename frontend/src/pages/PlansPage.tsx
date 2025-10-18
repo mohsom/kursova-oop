@@ -16,9 +16,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  IconButton,
-  Alert,
-  Snackbar,
   Chip,
 } from "@mui/material";
 import { Add, Edit, Delete, AttachMoney, Schedule } from "@mui/icons-material";
@@ -35,30 +32,13 @@ const PlansPage: React.FC = () => {
     price: "",
     period: "monthly" as "monthly" | "yearly",
   });
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
-
-  const showSnackbar = React.useCallback(
-    (message: string, severity: "success" | "error") => {
-      setSnackbar({ open: true, message, severity });
-    },
-    []
-  );
 
   const loadPlans = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await plansApi.getAll();
-      setPlans(data);
-    } catch {
-      showSnackbar("Помилка завантаження планів", "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [showSnackbar]);
+    setLoading(true);
+    const data = await plansApi.getAll();
+    setPlans(data);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     loadPlans();
@@ -86,40 +66,25 @@ const PlansPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      const planData = {
-        name: formData.name,
-        price: parseFloat(formData.price),
-        period: formData.period,
-      };
+    const planData = {
+      name: formData.name,
+      price: parseFloat(formData.price),
+      period: formData.period,
+    };
 
-      if (editingPlan) {
-        await plansApi.update(editingPlan.id, planData);
-        showSnackbar("План успішно оновлений", "success");
-      } else {
-        await plansApi.create(planData);
-        showSnackbar("План успішно створений", "success");
-      }
-      handleCloseDialog();
-      loadPlans();
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Помилка збереження плану";
-      showSnackbar(errorMessage, "error");
+    if (editingPlan) {
+      await plansApi.update(editingPlan.id, planData);
+    } else {
+      await plansApi.create(planData);
     }
+    handleCloseDialog();
+    loadPlans();
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Ви впевнені, що хочете видалити цей план?")) {
-      try {
-        await plansApi.delete(id);
-        showSnackbar("План успішно видалений", "success");
-        loadPlans();
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Помилка видалення плану";
-        showSnackbar(errorMessage, "error");
-      }
+      await plansApi.delete(id);
+      loadPlans();
     }
   };
 
@@ -291,19 +256,6 @@ const PlansPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

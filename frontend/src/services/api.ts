@@ -19,26 +19,17 @@ export const usersApi = {
 
     getById: async (id: string): Promise<User> => {
         const response = await api.get<ApiResponse<User>>(`/users/${id}`);
-        if (!response.data.data) {
-            throw new Error('User not found');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     create: async (user: { name: string; email: string }): Promise<User> => {
         const response = await api.post<ApiResponse<User>>('/users', user);
-        if (!response.data.data) {
-            throw new Error('Failed to create user');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     update: async (id: string, user: { name: string; email: string }): Promise<User> => {
         const response = await api.put<ApiResponse<User>>(`/users/${id}`, user);
-        if (!response.data.data) {
-            throw new Error('Failed to update user');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     delete: async (id: string): Promise<void> => {
@@ -55,26 +46,17 @@ export const plansApi = {
 
     getById: async (id: string): Promise<SubscriptionPlan> => {
         const response = await api.get<ApiResponse<SubscriptionPlan>>(`/plans/${id}`);
-        if (!response.data.data) {
-            throw new Error('Plan not found');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     create: async (plan: { name: string; price: number; period: 'monthly' | 'yearly' }): Promise<SubscriptionPlan> => {
         const response = await api.post<ApiResponse<SubscriptionPlan>>('/plans', plan);
-        if (!response.data.data) {
-            throw new Error('Failed to create plan');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     update: async (id: string, plan: { name: string; price: number; period: 'monthly' | 'yearly' }): Promise<SubscriptionPlan> => {
         const response = await api.put<ApiResponse<SubscriptionPlan>>(`/plans/${id}`, plan);
-        if (!response.data.data) {
-            throw new Error('Failed to update plan');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     delete: async (id: string): Promise<void> => {
@@ -86,18 +68,12 @@ export const plansApi = {
 export const paymentApi = {
     simulate: async (payment: PaymentSimulation): Promise<unknown> => {
         const response = await api.post<ApiResponse<unknown>>('/payment/simulate', payment);
-        if (!response.data.data) {
-            throw new Error('Payment simulation failed');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     getStats: async (): Promise<TransactionStats> => {
         const response = await api.get<ApiResponse<TransactionStats>>('/payment/stats');
-        if (!response.data.data) {
-            throw new Error('Failed to get stats');
-        }
-        return response.data.data;
+        return response.data.data!;
     },
 
     getUserTransactions: async (email: string): Promise<Transaction[]> => {

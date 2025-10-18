@@ -7,8 +7,6 @@ import {
   Grid,
   Paper,
   CircularProgress,
-  Alert,
-  Snackbar,
 } from "@mui/material";
 import {
   LineChart,
@@ -32,30 +30,13 @@ import { TransactionStats } from "../types";
 const StatisticsPage: React.FC = () => {
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
-
-  const showSnackbar = React.useCallback(
-    (message: string, severity: "success" | "error") => {
-      setSnackbar({ open: true, message, severity });
-    },
-    []
-  );
 
   const loadStats = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await paymentApi.getStats();
-      setStats(data);
-    } catch {
-      showSnackbar("Помилка завантаження статистики", "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [showSnackbar]);
+    setLoading(true);
+    const data = await paymentApi.getStats();
+    setStats(data);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     loadStats();
@@ -91,7 +72,16 @@ const StatisticsPage: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Статистика транзакцій
         </Typography>
-        <Alert severity="error">Не вдалося завантажити статистику</Alert>
+        <Box
+          sx={{
+            p: 2,
+            backgroundColor: "#ffebee",
+            borderRadius: 1,
+            color: "red",
+          }}
+        >
+          Не вдалося завантажити статистику
+        </Box>
       </Box>
     );
   }
@@ -103,10 +93,17 @@ const StatisticsPage: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Статистика транзакцій
         </Typography>
-        <Alert severity="info">
+        <Box
+          sx={{
+            p: 2,
+            backgroundColor: "#e3f2fd",
+            borderRadius: 1,
+            color: "blue",
+          }}
+        >
           Немає даних для відображення статистики. Створіть кілька транзакцій
           для аналізу.
-        </Alert>
+        </Box>
       </Box>
     );
   }
@@ -340,19 +337,6 @@ const StatisticsPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

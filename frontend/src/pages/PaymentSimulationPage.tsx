@@ -11,10 +11,7 @@ import {
   TextField,
   Button,
   Grid,
-  Paper,
   Divider,
-  Alert,
-  Snackbar,
   CircularProgress,
   Chip,
 } from "@mui/material";
@@ -35,32 +32,16 @@ const PaymentSimulationPage: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  const showSnackbar = React.useCallback(
-    (message: string, severity: "success" | "error") => {
-      setSnackbar({ open: true, message, severity });
-    },
-    []
-  );
-
   const loadData = React.useCallback(async () => {
-    try {
-      const [usersData, plansData] = await Promise.all([
-        usersApi.getAll(),
-        plansApi.getAll(),
-      ]);
-      setUsers(usersData);
-      setPlans(plansData);
-    } catch {
-      showSnackbar("Помилка завантаження даних", "error");
-    }
-  }, [showSnackbar]);
+    const [usersData, plansData] = await Promise.all([
+      usersApi.getAll(),
+      plansApi.getAll(),
+    ]);
+    setUsers(usersData);
+    setPlans(plansData);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -76,37 +57,26 @@ const PaymentSimulationPage: React.FC = () => {
   }, [selectedPlan, plans]);
 
   const handlePayment = async () => {
-    if (!selectedUser || !selectedPlan) {
-      showSnackbar("Будь ласка, оберіть користувача та план", "error");
-      return;
-    }
+    if (!selectedUser || !selectedPlan) return;
 
-    try {
-      setLoading(true);
-      const paymentData: PaymentSimulation = {
-        userEmail: selectedUser,
-        subscriptionPlanId: selectedPlan,
-        amount: amount,
-      };
+    setLoading(true);
+    const paymentData: PaymentSimulation = {
+      userEmail: selectedUser,
+      subscriptionPlanId: selectedPlan,
+      amount: amount,
+    };
 
-      await paymentApi.simulate(paymentData);
-      setPaymentSuccess(true);
-      showSnackbar("Оплата успішно проведена!", "success");
+    await paymentApi.simulate(paymentData);
+    setPaymentSuccess(true);
 
-      // Reset form after successful payment
-      setTimeout(() => {
-        setSelectedUser("");
-        setSelectedPlan("");
-        setAmount(0);
-        setPaymentSuccess(false);
-      }, 3000);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Помилка проведення оплати";
-      showSnackbar(errorMessage, "error");
-    } finally {
-      setLoading(false);
-    }
+    setTimeout(() => {
+      setSelectedUser("");
+      setSelectedPlan("");
+      setAmount(0);
+      setPaymentSuccess(false);
+    }, 3000);
+
+    setLoading(false);
   };
 
   const selectedUserData = users.find((u) => u.email === selectedUser);
@@ -273,27 +243,22 @@ const PaymentSimulationPage: React.FC = () => {
               </Box>
 
               {paymentSuccess && (
-                <Alert icon={<CheckCircle />} severity="success" sx={{ mt: 2 }}>
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    backgroundColor: "#e8f5e8",
+                    borderRadius: 1,
+                    color: "green",
+                  }}
+                >
                   Оплата успішно проведена!
-                </Alert>
+                </Box>
               )}
             </CardContent>
           </Card>
         </Grid>
       </Grid>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
