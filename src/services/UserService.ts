@@ -1,7 +1,8 @@
 import { DatabaseService } from '../database/DatabaseInterface';
 import { User } from '../models/User';
-import { UserData, UserSubscriptionData, SubscriptionPlanData } from '../types/DatabaseTypes';
-import { PaymentSimulationService } from './PaymentSimulationService';
+import { UserData } from '../types/DatabaseTypes';
+import { UserSubscriptionService } from './UserSubscriptionService';
+import { SubscriptionPlanService } from './SubscriptionPlanService';
 
 /**
  * Сервіс для роботи з користувачами
@@ -9,7 +10,8 @@ import { PaymentSimulationService } from './PaymentSimulationService';
 export class UserService {
     constructor(
         private userRepository: DatabaseService<UserData>,
-        private paymentSimulationService?: PaymentSimulationService
+        private userSubscriptionService: UserSubscriptionService,
+        private planService: SubscriptionPlanService
     ) { }
 
     /**
@@ -63,39 +65,18 @@ export class UserService {
     async getAllUsersWithSubscriptions(): Promise<any[]> {
         const usersData = await this.userRepository.findAll();
 
-        if (!this.paymentSimulationService) {
-            return usersData.map(userData => ({
+        const result = [];
+        for (const userData of usersData) {
+            const subscription = await this.userSubscriptionService.getUserSubscriptionsAsSubscription(userData.email);
+            const plan = await this.planService.getPlanById(subscription.subscriptionPlanId);
+
+            result.push({
                 id: userData.id,
                 name: userData.name,
                 email: userData.email,
-                subscription: null
-            }));
-        }
-
-        const result = [];
-        for (const userData of usersData) {
-            try {
-                const subscriptions = await this.paymentSimulationService.getUserSubscriptionsAsSubscriptions(userData.email);
-                const activeSubscription = subscriptions.find(sub => {
-                    const endDate = new Date(sub.endDate);
-                    return endDate > new Date();
-                });
-
-                result.push({
-                    id: userData.id,
-                    name: userData.name,
-                    email: userData.email,
-                    subscription: activeSubscription || null
-                });
-            } catch (error) {
-                console.error(`Помилка отримання підписок для користувача ${userData.email}:`, error);
-                result.push({
-                    id: userData.id,
-                    name: userData.name,
-                    email: userData.email,
-                    subscription: null
-                });
-            }
+                subscription: subscription || null,
+                plan: plan || null
+            });
         }
 
         return result;

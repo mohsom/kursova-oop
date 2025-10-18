@@ -3,10 +3,10 @@ export interface User {
     name: string;
     email: string;
     subscription?: {
-        planName: string;
         status: string;
-        endDate: string;
+        subscriptionEndDate: string;
     };
+    plan?: SubscriptionPlan;
 }
 
 export interface SubscriptionPlan {

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { UserService } from '../services/UserService';
 import { SubscriptionPlanService } from '../services/SubscriptionPlanService';
 import { PaymentSimulationService } from '../services/PaymentSimulationService';
+import { UserSubscriptionService } from '../services/UserSubscriptionService';
 
 /**
  * Створення роутерів для API
@@ -9,7 +10,8 @@ import { PaymentSimulationService } from '../services/PaymentSimulationService';
 export function createRoutes(
   userService: UserService,
   planService: SubscriptionPlanService,
-  paymentSimulationService: PaymentSimulationService
+  paymentSimulationService: PaymentSimulationService,
+  userSubscriptionService: UserSubscriptionService
 ): Router {
   const router = Router();
 
@@ -301,21 +303,6 @@ export function createRoutes(
     }
   });
 
-  /**
-   * GET /api/subscriptions - Отримати всі підписки
-   */
-  router.get('/subscriptions', async (_req: Request, res: Response) => {
-    try {
-      const subscriptions = await paymentSimulationService.getAllSubscriptionsAsSubscriptions();
-      res.json({ success: true, data: subscriptions });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання підписок',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
 
   /**
    * GET /api/payment/user/:email/subscriptions - Отримати підписки користувача
@@ -323,8 +310,8 @@ export function createRoutes(
   router.get('/payment/user/:email/subscriptions', async (req: Request, res: Response) => {
     try {
       const { email } = req.params;
-      const subscriptions = await paymentSimulationService.getUserSubscriptionsAsSubscriptions(email);
-      res.json({ success: true, data: subscriptions });
+      const subscription = await userSubscriptionService.getUserSubscriptionsAsSubscription(email);
+      res.json({ success: true, data: subscription });
     } catch (error) {
       res.status(500).json({
         success: false,

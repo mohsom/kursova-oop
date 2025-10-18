@@ -5,6 +5,7 @@ import { databaseFactory } from './database/DatabaseFactory';
 import { UserService } from './services/UserService';
 import { SubscriptionPlanService } from './services/SubscriptionPlanService';
 import { PaymentSimulationService } from './services/PaymentSimulationService';
+import { UserSubscriptionService } from './services/UserSubscriptionService';
 import { createRoutes } from './api/routes';
 import { UserData, SubscriptionPlanData, UserSubscriptionData, TransactionData } from './types/DatabaseTypes';
 
@@ -37,19 +38,23 @@ class Server {
     const transactionRepository = databaseFactory.createService<TransactionData>('transactions');
 
     // Створення сервісів
+    const userSubscriptionService = new UserSubscriptionService(
+      subscriptionRepository,
+    );
     const paymentSimulationService = new PaymentSimulationService(
       userRepository,
       subscriptionRepository,
       transactionRepository,
       planRepository
     );
-    const userService = new UserService(userRepository, paymentSimulationService);
     const planService = new SubscriptionPlanService(planRepository);
+    const userService = new UserService(userRepository, userSubscriptionService, planService);
 
     // Збереження сервісів в app locals для використання в роутах
     this.app.locals.userService = userService;
     this.app.locals.planService = planService;
     this.app.locals.paymentSimulationService = paymentSimulationService;
+    this.app.locals.userSubscriptionService = userSubscriptionService;
 
     console.log('База даних ініціалізована');
   }
@@ -80,10 +85,10 @@ class Server {
    * Ініціалізація роутів
    */
   private initializeRoutes(): void {
-    const { userService, planService, paymentSimulationService } = this.app.locals;
+    const { userService, planService, paymentSimulationService, userSubscriptionService } = this.app.locals;
 
     // API роути
-    this.app.use('/api', createRoutes(userService, planService, paymentSimulationService));
+    this.app.use('/api', createRoutes(userService, planService, paymentSimulationService, userSubscriptionService));
 
     // Головна сторінка
     this.app.get('/', (_req, res) => {

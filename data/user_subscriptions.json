@@ -1,7 +1,7 @@
 [
   {
     "id": "sub1",
-    "userId": "user1",
+    "email": "ivan@example.com",
     "planId": "plan2",
     "status": "active",
     "startDate": "2024-01-15T10:00:00.000Z",
@@ -15,7 +15,7 @@
   },
   {
     "id": "sub2",
-    "userId": "user2",
+    "email": "maria@example.com",
     "planId": "plan1",
     "status": "active",
     "startDate": "2024-01-10T09:30:00.000Z",
@@ -29,7 +29,7 @@
   },
   {
     "id": "sub3",
-    "userId": "user3",
+    "email": "oleksiy@example.com",
     "planId": "plan4",
     "status": "active",
     "startDate": "2024-01-01T00:00:00.000Z",
@@ -43,7 +43,7 @@
   },
   {
     "id": "sub4",
-    "userId": "user4",
+    "email": "anna@example.com",
     "planId": "plan3",
     "status": "expired",
     "startDate": "2023-12-01T08:00:00.000Z",
@@ -57,7 +57,7 @@
   },
   {
     "id": "sub5",
-    "userId": "user5",
+    "email": "dmitro@example.com",
     "planId": "plan2",
     "status": "active",
     "startDate": "2024-01-20T14:15:00.000Z",

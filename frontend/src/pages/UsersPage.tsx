@@ -181,11 +181,11 @@ const UsersPage: React.FC = () => {
               <TableRow key={user.id}>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.name}</TableCell>
-                <TableCell>{user.subscription?.planName || "Немає"}</TableCell>
+                <TableCell>{user.plan?.name || "Немає"}</TableCell>
                 <TableCell>{getStatusChip(user)}</TableCell>
                 <TableCell>
-                  {user.subscription?.endDate
-                    ? formatDate(user.subscription.endDate)
+                  {user.subscription?.subscriptionEndDate
+                    ? formatDate(user.subscription.subscriptionEndDate)
                     : "Немає"}
                 </TableCell>
                 <TableCell>

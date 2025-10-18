@@ -49,8 +49,16 @@ export class PaymentSimulationService {
         // Зберігаємо підписку в базі даних
         await this.subscriptionRepository.create({
             email: userSubscription.email,
-            subscriptionPlanId: userSubscription.subscriptionPlanId,
-            subscriptionEndDate: userSubscription.subscriptionEndDate
+            planId: userSubscription.subscriptionPlanId,
+            status: 'active',
+            startDate: new Date().toISOString(),
+            endDate: userSubscription.subscriptionEndDate.toISOString(),
+            subscriptionEndDate: userSubscription.subscriptionEndDate.toISOString(),
+            price: plan.price,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            autoRenew: false,
+            billingInterval: plan.period
         });
 
         // Створюємо транзакцію
@@ -71,45 +79,6 @@ export class PaymentSimulationService {
         return { userSubscription, transaction };
     }
 
-    /**
-     * Отримати всі підписки користувача
-     */
-    async getUserSubscriptions(userEmail: string): Promise<UserSubscription[]> {
-        const subscriptionsData = await this.subscriptionRepository.findBy({ email: userEmail });
-        return subscriptionsData.map(subData => new UserSubscription(
-            subData.email,
-            subData.subscriptionPlanId,
-            new Date(subData.subscriptionEndDate)
-        ));
-    }
-
-    /**
-     * Отримати всі підписки користувача як Subscription об'єкти
-     */
-    async getUserSubscriptionsAsSubscriptions(userEmail: string): Promise<any[]> {
-        const subscriptionsData = await this.subscriptionRepository.findBy({ email: userEmail });
-        return subscriptionsData.map(subData => {
-            // Перевіряємо, чи subscriptionEndDate є Date об'єктом
-            const endDate = subData.subscriptionEndDate instanceof Date
-                ? subData.subscriptionEndDate
-                : new Date(subData.subscriptionEndDate);
-
-            return {
-                id: subData.id,
-                userId: subData.email,
-                planId: subData.subscriptionPlanId,
-                status: 'active' as const,
-                startDate: new Date().toISOString(),
-                endDate: endDate.toISOString(),
-                subscriptionEndDate: endDate.toISOString(),
-                price: 0,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                autoRenew: false,
-                billingInterval: 'monthly' as const
-            };
-        });
-    }
 
     /**
      * Отримати всі транзакції користувача
@@ -124,33 +93,6 @@ export class PaymentSimulationService {
         ));
     }
 
-    /**
-     * Отримати всі підписки як Subscription об'єкти
-     */
-    async getAllSubscriptionsAsSubscriptions(): Promise<any[]> {
-        const subscriptionsData = await this.subscriptionRepository.findAll();
-        return subscriptionsData.map(subData => {
-            // Перевіряємо, чи subscriptionEndDate є Date об'єктом
-            const endDate = subData.subscriptionEndDate instanceof Date
-                ? subData.subscriptionEndDate
-                : new Date(subData.subscriptionEndDate);
-
-            return {
-                id: subData.id,
-                userId: subData.email,
-                planId: subData.subscriptionPlanId,
-                status: 'active' as const,
-                startDate: new Date().toISOString(),
-                endDate: endDate.toISOString(),
-                subscriptionEndDate: endDate.toISOString(),
-                price: 0,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                autoRenew: false,
-                billingInterval: 'monthly' as const
-            };
-        });
-    }
 
     /**
      * Отримати статистику транзакцій

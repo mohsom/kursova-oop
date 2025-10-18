@@ -18,8 +18,16 @@ export interface SubscriptionPlanData {
 export interface UserSubscriptionData {
     id: string;
     email: string;
-    subscriptionPlanId: string;
-    subscriptionEndDate: Date;
+    planId: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+    subscriptionEndDate: string;
+    price: number;
+    createdAt: string;
+    updatedAt: string;
+    autoRenew: boolean;
+    billingInterval: string;
 }
 
 export interface TransactionData {
