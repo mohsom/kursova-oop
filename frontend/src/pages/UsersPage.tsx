@@ -17,8 +17,6 @@ import {
   TextField,
   Chip,
   IconButton,
-  Alert,
-  Snackbar,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { usersApi } from "../services/api";
@@ -30,30 +28,13 @@ const UsersPage: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "" });
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
-
-  const showSnackbar = React.useCallback(
-    (message: string, severity: "success" | "error") => {
-      setSnackbar({ open: true, message, severity });
-    },
-    []
-  );
 
   const loadUsers = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await usersApi.getAll();
-      setUsers(data);
-    } catch {
-      showSnackbar("Помилка завантаження користувачів", "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [showSnackbar]);
+    setLoading(true);
+    const data = await usersApi.getAll();
+    setUsers(data);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     loadUsers();
@@ -77,38 +58,19 @@ const UsersPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      if (editingUser) {
-        await usersApi.update(editingUser.id, formData);
-        showSnackbar("Користувач успішно оновлений", "success");
-      } else {
-        await usersApi.create(formData);
-        showSnackbar("Користувач успішно створений", "success");
-      }
-      handleCloseDialog();
-      loadUsers();
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Помилка збереження користувача";
-      showSnackbar(errorMessage, "error");
+    if (editingUser) {
+      await usersApi.update(editingUser.id, formData);
+    } else {
+      await usersApi.create(formData);
     }
+    handleCloseDialog();
+    loadUsers();
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm("Ви впевнені, що хочете видалити цього користувача?")) {
-      try {
-        await usersApi.delete(id);
-        showSnackbar("Користувач успішно видалений", "success");
-        loadUsers();
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Помилка видалення користувача";
-        showSnackbar(errorMessage, "error");
-      }
+      await usersApi.delete(id);
+      loadUsers();
     }
   };
 
@@ -117,10 +79,8 @@ const UsersPage: React.FC = () => {
       return <Chip label="Без підписки" color="default" size="small" />;
     }
 
-    // Перевіряємо, чи підписка ще активна за датою закінчення
     const endDate = new Date(user.subscription.subscriptionEndDate);
-    const currentDate = new Date();
-    const isActive = endDate > currentDate;
+    const isActive = endDate > new Date();
 
     return (
       <Chip
@@ -252,19 +212,6 @@ const UsersPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
