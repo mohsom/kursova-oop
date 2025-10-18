@@ -34,31 +34,6 @@ export function createRoutes(
   });
 
   /**
-   * GET /api/users/:id - Отримати користувача за ID
-   */
-  router.get('/users/:id', async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const user = await userService.getUserById(id);
-
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: 'Користувач не знайдений'
-        });
-      }
-
-      res.json({ success: true, data: user });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання користувача',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
    * POST /api/users - Створити нового користувача
    */
   router.post('/users', async (req: Request, res: Response) => {
@@ -303,23 +278,6 @@ export function createRoutes(
     }
   });
 
-
-  /**
-   * GET /api/payment/user/:email/subscriptions - Отримати підписки користувача
-   */
-  router.get('/payment/user/:email/subscriptions', async (req: Request, res: Response) => {
-    try {
-      const { email } = req.params;
-      const subscription = await userSubscriptionService.getUserSubscriptionsAsSubscription(email);
-      res.json({ success: true, data: subscription });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання підписки користувача',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
 
   /**
    * GET /api/payment/user/:email/transactions - Отримати транзакції користувача

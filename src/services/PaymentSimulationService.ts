@@ -2,14 +2,13 @@ import { DatabaseService } from '../database/DatabaseInterface';
 import { UserSubscription } from '../models/UserSubscription';
 import { Transaction } from '../models/Transaction';
 import { SubscriptionPlan } from '../models/SubscriptionPlan';
-import { UserData, SubscriptionPlanData, UserSubscriptionData, TransactionData } from '../types/DatabaseTypes';
+import { SubscriptionPlanData, UserSubscriptionData, TransactionData } from '../types/DatabaseTypes';
 
 /**
  * Сервіс для симуляції оплати
  */
 export class PaymentSimulationService {
     constructor(
-        private userRepository: DatabaseService<UserData>,
         private subscriptionRepository: DatabaseService<UserSubscriptionData>,
         private transactionRepository: DatabaseService<TransactionData>,
         private planRepository: DatabaseService<SubscriptionPlanData>

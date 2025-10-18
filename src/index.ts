@@ -42,7 +42,6 @@ class Server {
       subscriptionRepository,
     );
     const paymentSimulationService = new PaymentSimulationService(
-      userRepository,
       subscriptionRepository,
       transactionRepository,
       planRepository
@@ -119,22 +118,6 @@ class Server {
     this.app.listen(this.port, () => {
       console.log(`🚀 Сервер запущено на порту ${this.port}`);
       console.log(`📱 API доступне за адресою: http://localhost:${this.port}/api`);
-      console.log(`🌐 Головна сторінка: http://localhost:${this.port}`);
-      console.log('\n📋 Доступні endpoints:');
-      console.log('  GET    /api/users                    - Отримати всіх користувачів');
-      console.log('  GET    /api/users/:id                 - Отримати користувача за ID');
-      console.log('  POST   /api/users                     - Створити користувача');
-      console.log('  PUT    /api/users/:id                 - Оновити користувача');
-      console.log('  DELETE /api/users/:id                 - Видалити користувача');
-      console.log('  GET    /api/plans                     - Отримати всі плани підписок');
-      console.log('  GET    /api/plans/:id                 - Отримати план за ID');
-      console.log('  POST   /api/plans                     - Створити план підписки');
-      console.log('  PUT    /api/plans/:id                 - Оновити план підписки');
-      console.log('  DELETE /api/plans/:id                 - Видалити план');
-      console.log('  POST   /api/payment/simulate         - Симуляція оплати');
-      console.log('  GET    /api/payment/user/:email/subscriptions - Підписки користувача');
-      console.log('  GET    /api/payment/user/:email/transactions - Транзакції користувача');
-      console.log('  GET    /api/payment/stats             - Статистика транзакцій');
     });
   }
 }
