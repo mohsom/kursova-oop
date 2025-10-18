@@ -57,14 +57,16 @@ export class PaymentSimulationService {
             this.generateId(),
             amount,
             userEmail,
-            subscriptionPlanId
+            subscriptionPlanId,
+            new Date().toISOString()
         );
 
         // Зберігаємо транзакцію в базі даних
         await this.transactionRepository.create({
             amount: transaction.amount,
             email: transaction.email,
-            subscriptionPlanId: transaction.subscriptionPlanId
+            subscriptionPlanId: transaction.subscriptionPlanId,
+            date: transaction.date
         });
 
         return { userSubscription, transaction };
@@ -74,36 +76,15 @@ export class PaymentSimulationService {
     /**
      * Отримати всі транзакції користувача
      */
-    async getUserTransactions(userEmail: string): Promise<Transaction[]> {
-        const transactionsData = await this.transactionRepository.findBy({ email: userEmail });
+    async getTransactions(): Promise<Transaction[]> {
+        const transactionsData = await this.transactionRepository.findAll();
         return transactionsData.map(transData => new Transaction(
             transData.id,
             transData.amount,
             transData.email,
-            transData.subscriptionPlanId
+            transData.subscriptionPlanId,
+            transData.date
         ));
-    }
-
-
-    /**
-     * Отримати статистику транзакцій
-     */
-    async getTransactionStats(): Promise<{
-        totalTransactions: number;
-        totalAmount: number;
-        averageAmount: number;
-    }> {
-        const transactionsData = await this.transactionRepository.findAll();
-
-        const totalTransactions = transactionsData.length;
-        const totalAmount = transactionsData.reduce((sum: number, trans: { amount: number }) => sum + trans.amount, 0);
-        const averageAmount = totalTransactions > 0 ? totalAmount / totalTransactions : 0;
-
-        return {
-            totalTransactions,
-            totalAmount,
-            averageAmount
-        };
     }
 
     /**

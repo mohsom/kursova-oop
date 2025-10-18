@@ -6,7 +6,8 @@ export class Transaction {
     public id: string,
     public amount: number,
     public email: string,
-    public subscriptionPlanId: string
+    public subscriptionPlanId: string,
+    public date: string
   ) { }
 
   /**

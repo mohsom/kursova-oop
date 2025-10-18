@@ -80,6 +80,11 @@ export const paymentApi = {
         const response = await api.get<ApiResponse<Transaction[]>>(`/payment/user/${email}/transactions`);
         return response.data.data || [];
     },
+
+    getTransactions: async (): Promise<Transaction[]> => {
+        const response = await api.get<ApiResponse<Transaction[]>>('/payment/transactions');
+        return response.data.data || [];
+    },
 };
 
 export default api;

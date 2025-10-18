@@ -282,31 +282,14 @@ export function createRoutes(
   /**
    * GET /api/payment/user/:email/transactions - Отримати транзакції користувача
    */
-  router.get('/payment/user/:email/transactions', async (req: Request, res: Response) => {
+  router.get('/payment/transactions', async (req: Request, res: Response) => {
     try {
-      const { email } = req.params;
-      const transactions = await paymentSimulationService.getUserTransactions(email);
+      const transactions = await paymentSimulationService.getTransactions();
       res.json({ success: true, data: transactions });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'Помилка отримання транзакцій користувача',
-        error: error instanceof Error ? error.message : 'Невідома помилка'
-      });
-    }
-  });
-
-  /**
-   * GET /api/payment/stats - Отримати статистику транзакцій
-   */
-  router.get('/payment/stats', async (_req: Request, res: Response) => {
-    try {
-      const stats = await paymentSimulationService.getTransactionStats();
-      res.json({ success: true, data: stats });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Помилка отримання статистики',
         error: error instanceof Error ? error.message : 'Невідома помилка'
       });
     }

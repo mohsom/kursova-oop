@@ -27,4 +27,5 @@ export interface TransactionData {
     amount: number;
     email: string;
     subscriptionPlanId: string;
+    date: string
 }
