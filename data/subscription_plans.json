@@ -1,1 +1,32 @@
-[]
+[
+    {
+        "id": "plan1",
+        "name": "Базовий",
+        "price": 299,
+        "period": "monthly"
+    },
+    {
+        "id": "plan2",
+        "name": "Професійний",
+        "price": 599,
+        "period": "monthly"
+    },
+    {
+        "id": "plan3",
+        "name": "Преміум",
+        "price": 999,
+        "period": "monthly"
+    },
+    {
+        "id": "plan4",
+        "name": "Базовий річний",
+        "price": 2999,
+        "period": "yearly"
+    },
+    {
+        "id": "plan5",
+        "name": "Професійний річний",
+        "price": 5999,
+        "period": "yearly"
+    }
+]

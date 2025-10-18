@@ -1,1 +1,27 @@
-[]
+[
+    {
+        "id": "user1",
+        "name": "Іван Петренко",
+        "email": "ivan@example.com"
+    },
+    {
+        "id": "user2",
+        "name": "Марія Коваленко",
+        "email": "maria@example.com"
+    },
+    {
+        "id": "user3",
+        "name": "Олексій Сидоренко",
+        "email": "oleksiy@example.com"
+    },
+    {
+        "id": "user4",
+        "name": "Анна Мельник",
+        "email": "anna@example.com"
+    },
+    {
+        "id": "user5",
+        "name": "Дмитро Шевченко",
+        "email": "dmitro@example.com"
+    }
+]

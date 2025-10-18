@@ -1,14 +1,72 @@
 [
   {
-    "amount": 10,
-    "email": "vova@test.com",
-    "subscriptionPlanId": "mgf4m93wma7lzt3qsup",
-    "id": "mgf4midxpdl0zri0tqm"
+    "id": "txn1",
+    "amount": 599,
+    "email": "ivan@example.com",
+    "subscriptionPlanId": "plan2",
+    "date": "2024-01-15T10:00:00.000Z"
   },
   {
-    "amount": 10,
-    "email": "vova@test.com",
-    "subscriptionPlanId": "mgf4m93wma7lzt3qsup",
-    "id": "mgf4v6aqyqxl2zwyhh"
+    "id": "txn2",
+    "amount": 299,
+    "email": "maria@example.com",
+    "subscriptionPlanId": "plan1",
+    "date": "2024-01-10T09:30:00.000Z"
+  },
+  {
+    "id": "txn3",
+    "amount": 2999,
+    "email": "oleksiy@example.com",
+    "subscriptionPlanId": "plan4",
+    "date": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "txn4",
+    "amount": 999,
+    "email": "anna@example.com",
+    "subscriptionPlanId": "plan3",
+    "date": "2023-12-01T08:00:00.000Z"
+  },
+  {
+    "id": "txn5",
+    "amount": 599,
+    "email": "dmitro@example.com",
+    "subscriptionPlanId": "plan2",
+    "date": "2024-01-20T14:15:00.000Z"
+  },
+  {
+    "id": "txn6",
+    "amount": 299,
+    "email": "maria@example.com",
+    "subscriptionPlanId": "plan1",
+    "date": "2023-12-10T09:30:00.000Z"
+  },
+  {
+    "id": "txn7",
+    "amount": 599,
+    "email": "ivan@example.com",
+    "subscriptionPlanId": "plan2",
+    "date": "2023-12-15T10:00:00.000Z"
+  },
+  {
+    "id": "txn8",
+    "amount": 999,
+    "email": "anna@example.com",
+    "subscriptionPlanId": "plan3",
+    "date": "2023-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "txn9",
+    "amount": 2999,
+    "email": "oleksiy@example.com",
+    "subscriptionPlanId": "plan4",
+    "date": "2023-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "txn10",
+    "amount": 599,
+    "email": "dmitro@example.com",
+    "subscriptionPlanId": "plan2",
+    "date": "2023-12-20T14:15:00.000Z"
   }
 ]
