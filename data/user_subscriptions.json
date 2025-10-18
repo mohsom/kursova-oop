@@ -28,5 +28,11 @@
     "email": "dmitro@example.com",
     "subscriptionPlanId": "plan2",
     "subscriptionEndDate": "2024-12-20T14:15:00.000Z"
+  },
+  {
+    "email": "olena@example.com",
+    "subscriptionPlanId": "plan5",
+    "subscriptionEndDate": "2026-10-18T20:08:32.990Z",
+    "id": "mgwpn3dq9pnbzksod7q"
   }
 ]

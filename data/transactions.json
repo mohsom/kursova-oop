@@ -68,5 +68,12 @@
     "email": "dmitro@example.com",
     "subscriptionPlanId": "plan2",
     "date": "2023-12-20T14:15:00.000Z"
+  },
+  {
+    "amount": 5999,
+    "email": "olena@example.com",
+    "subscriptionPlanId": "plan5",
+    "date": "2025-10-18T20:08:32.990Z",
+    "id": "mgwpn3dq59s10nc6eoy"
   }
 ]
