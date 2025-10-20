@@ -75,5 +75,12 @@
     "subscriptionPlanId": "plan5",
     "date": "2025-10-18T20:08:32.990Z",
     "id": "mgwpn3dq59s10nc6eoy"
+  },
+  {
+    "amount": 299,
+    "email": "vova@test.com",
+    "subscriptionPlanId": "plan1",
+    "date": "2025-10-20T08:32:32.207Z",
+    "id": "mgyvnpvz3slw20dqcji"
   }
 ]
