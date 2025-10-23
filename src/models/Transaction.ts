@@ -4,6 +4,7 @@
 export class Transaction {
   constructor(
     public id: string,
+    // remove
     public amount: number,
     public email: string,
     public subscriptionPlanId: string,

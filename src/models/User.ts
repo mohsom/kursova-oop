@@ -7,6 +7,7 @@ export class User {
   private userSubscription?: UserSubscription;
 
   constructor(
+    // видалити user id
     public id: string,
     public name: string,
     public email: string

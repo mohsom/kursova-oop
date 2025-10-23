@@ -37,25 +37,4 @@ export class UserSubscription {
             return 'Неактивна';
         }
     }
-
-    /**
-     * Продовжити підписку на вказану кількість днів
-     */
-    extendSubscription(days: number): void {
-        this.subscriptionEndDate = new Date(this.subscriptionEndDate.getTime() + (days * 24 * 60 * 60 * 1000));
-    }
-
-    /**
-     * Продовжити підписку на місяць
-     */
-    extendByMonth(): void {
-        this.subscriptionEndDate = new Date(this.subscriptionEndDate.getTime() + (30 * 24 * 60 * 60 * 1000));
-    }
-
-    /**
-     * Продовжити підписку на рік
-     */
-    extendByYear(): void {
-        this.subscriptionEndDate = new Date(this.subscriptionEndDate.getTime() + (365 * 24 * 60 * 60 * 1000));
-    }
 }
