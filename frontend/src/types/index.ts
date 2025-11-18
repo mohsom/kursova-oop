@@ -2,8 +2,11 @@ export interface User {
     id: string;
     name: string;
     email: string;
+    plan?: {
+        id: string;
+        name: string;
+    };
     subscription?: {
-        planName: string;
         status: string;
         subscriptionEndDate: string;
     };

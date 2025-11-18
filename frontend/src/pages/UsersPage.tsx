@@ -108,6 +108,8 @@ const UsersPage: React.FC = () => {
     );
   }
 
+  console.log(users);
+
   return (
     <Box>
       <Box
@@ -145,7 +147,7 @@ const UsersPage: React.FC = () => {
               <TableRow key={user.id}>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.name}</TableCell>
-                <TableCell>{user.subscription?.planName || "Немає"}</TableCell>
+                <TableCell>{user.plan?.name || "Немає"}</TableCell>
                 <TableCell>{getStatusChip(user)}</TableCell>
                 <TableCell>
                   {user.subscription?.subscriptionEndDate
