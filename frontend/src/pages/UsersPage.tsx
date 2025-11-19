@@ -108,7 +108,6 @@ const UsersPage: React.FC = () => {
     );
   }
 
-  console.log(users);
 
   return (
     <Box>
