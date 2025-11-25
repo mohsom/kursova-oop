@@ -1,0 +1,87 @@
+<mxfile host="app.diagrams.net" modified="2025-11-24T16:25:00.000Z" agent="Mozilla/5.0" etag="gK4dE8iY2vG0X-fWj-W6" version="23.1.5" type="embed">
+  <diagram id="domain_relationships_ukr" name="Взаємозв'язки Об'єктів">
+    <mxGraphModel dx="1295" dy="728" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <mxCell id="101" value="&lt;b&gt;Користувач&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="200" width="160" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="102" value="&lt;b&gt;Підписка Користувача&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="350" y="200" width="180" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="103" value="&lt;b&gt;План Підписки&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="630" y="200" width="180" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="104" value="&lt;b&gt;Транзакція&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Arial;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="350" width="160" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="105" value="1" style="endArrow=none;html=1;edgeStyle=orthogonalEdgeStyle;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=diamond;startSize=12;fillColor=#f8cecc;strokeColor=#b85450;" edge="1" parent="1" source="101" target="102">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="260" y="235" as="sourcePoint" />
+            <mxPoint x="350" y="235" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="305" y="235" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="106" value="1" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" vertex="1" connectable="0" parent="105">
+          <mxGeometry x="-1" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="107" value="має" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=bottom;" vertex="1" connectable="0" parent="105">
+          <mxGeometry x="-1" relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="108" value="N" style="endArrow=block;html=1;edgeStyle=orthogonalEdgeStyle;endFill=1;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1" source="102" target="103">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="235" as="sourcePoint" />
+            <mxPoint x="630" y="235" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="580" y="235" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="109" value="1" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=middle;" vertex="1" connectable="0" parent="108">
+          <mxGeometry x="1" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="110" value="використовує" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=bottom;" vertex="1" connectable="0" parent="108">
+          <mxGeometry x="0" relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="111" value="1" style="endArrow=block;html=1;edgeStyle=orthogonalEdgeStyle;endFill=1;fillColor=#fff2cc;strokeColor=#d6b656;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="101" target="104">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="180" y="270" as="sourcePoint" />
+            <mxPoint x="180" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="112" value="N" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=bottom;" vertex="1" connectable="0" parent="111">
+          <mxGeometry x="0" y="-10" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="113" value="створює" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=top;" vertex="1" connectable="0" parent="111">
+          <mxGeometry x="0" y="10" relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="114" value="&lt;b&gt;Сервіс&lt;/b&gt;&lt;br&gt;&lt;i&gt;(PaymentSimulationService)&lt;/i&gt;" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontFamily=Arial;fontSize:12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="550" width="180" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="115" value="&lt;b&gt;Репозиторій&lt;/b&gt;&lt;br&gt;&lt;i&gt;(DatabaseService&amp;lt;T&amp;gt;)&lt;/i&gt;" style="html=1;whiteSpace=wrap;fillColor=#f0f8ff;strokeColor=#99ccff;fontFamily=Arial;fontSize:12;" vertex="1" parent="1">
+          <mxGeometry x="650" y="550" width="180" height="70" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="116" value="&lt;i&gt;Dependency Injection&lt;/i&gt;" style="endArrow=open;html=1;endFill=0;endSize=12;dashed=1;" edge="1" parent="1" source="114" target="115">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="585" as="sourcePoint" />
+            <mxPoint x="650" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
